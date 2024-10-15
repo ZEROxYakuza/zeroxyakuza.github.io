@@ -58,8 +58,8 @@ In x86 architecture, calling conventions define how functions receive parameters
 
 ### In summary...
 
-![](../assets/img/more_images/2024-08-18_00-32.png)
-![](../assets/img/more_images/2024-08-18_00-38.png)
+![](/assets/img/more_images/2024-08-18_00-32.png)
+![](/assets/img/more_images/2024-08-18_00-38.png)
 
 ## Key Aspects of the System Call Problem on Windows
 
@@ -127,17 +127,17 @@ Once you find the entry corresponding to the desired DLL, you can extract inform
 
 We are going to test all of this with WinDbg and the "Sync Breeze" server (attaching WinDbg to it).
 
-![](../assets/img/more_images/2024-08-18_01-04.png)
+![](/assets/img/more_images/2024-08-18_01-04.png)
 
 The image shows that at offset 0x30 we have a pointer to the PEB structure.
 
 Now we are going to find the Ldr pointer.
 
-![](../assets/img/more_images/2024-08-18_01-06.png)
+![](/assets/img/more_images/2024-08-18_01-06.png)
 
 The pointer to the "_PEB_LDR_DATA" structure, is located at offset 0x0C inside the PEB. Let's inspect the "_PEB_LDR_DATA" structure.
 
-![](../assets/img/more_images/2024-08-18_01-09.png)
+![](/assets/img/more_images/2024-08-18_01-09.png)
 
 We find three linked lists, each of which offers a different ordering of the loaded modules:
 
@@ -149,13 +149,13 @@ We find three linked lists, each of which offers a different ordering of the loa
 
 The "InInitializationOrderModuleList" structure has two fields:
 
-![](../assets/img/more_images/2024-08-18_01-16.png)
+![](/assets/img/more_images/2024-08-18_01-16.png)
 
 The Flink and Blink fields are commonly used in doubly-linked lists to access the next (Flink) or previous (Blink) entry in the list.
 
 The "_LIST_ENTRY" structure is embedded as part of a larger structure of type "_LDR_DATA_TABLE_ENTRY_".
 
-![](../assets/img/more_images/2024-08-18_01-20.png)
+![](/assets/img/more_images/2024-08-18_01-20.png)
 
 The structure contains a field called DllBase. As the name suggests, this field holds the DLL's base address. We can also obtain the name of the DLL using the BaseDllName field.
 
