@@ -77,4 +77,8 @@ with socket.create_connection(target) as sock:
 
 We start clicking at the binary to execute it.
 
-![]("/assets/more_images/2024-10-25.png")
+![]("/assets/img/more_images/2024-10-25-1.png")
+
+Don't forget to attach the debugger to it, in this case I will use "WinDbg". Attach it and send the payload.
+
+![]("/assets/img/more_images/2024-10-25-2.png")
