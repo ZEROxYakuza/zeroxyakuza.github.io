@@ -77,4 +77,4 @@ with socket.create_connection(target) as sock:
 
 We start clicking at the binary to execute it.
 
-
+![]("/assets/more_images/2024-10-25.png")
