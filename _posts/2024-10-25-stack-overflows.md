@@ -74,3 +74,7 @@ with socket.create_connection(target) as sock:
     print(f"sent {sent} bytes")
 
 ```
+
+We start clicking at the binary to execute it.
+
+
