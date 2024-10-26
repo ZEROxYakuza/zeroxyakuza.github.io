@@ -82,3 +82,8 @@ We start clicking at the binary to execute it.
 Don't forget to attach the debugger to it, in this case I will use "WinDbg". Attach it and send the payload.
 
 ![](/assets/img/more_images/2024-10-25-2.png)
+
+We see that the "eip" is overwritten. We need to find a offset to overwrite the "eip" with out desired value.
+
+![imagen](https://github.com/user-attachments/assets/c43c9f82-9c56-4191-ada8-1be685eef0b8)
+
