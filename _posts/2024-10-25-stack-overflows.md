@@ -83,7 +83,7 @@ Don't forget to attach the debugger to it, in this case I will use "WinDbg". Att
 
 ![](/assets/img/more_images/2024-10-25-2.png)
 
-We see that the "eip" is overwritten. We need to find a offset to overwrite the "eip" with out desired value.
+We see that the "eip" is overwritten. We need to find a offset to overwrite the "eip" with our desired value.
 
 
 
