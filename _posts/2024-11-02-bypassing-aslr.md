@@ -69,7 +69,7 @@ def send():
         print("Data sent to the server\n")
 ```
 
-All modules are compiled with ASLR so we have to reverse the binary to find a memory leak or something like that...
+All modules are compiled with ASLR so we have to reverse the binary to find a memory leak or something like that.
 
 We will use IDA free version.
 
