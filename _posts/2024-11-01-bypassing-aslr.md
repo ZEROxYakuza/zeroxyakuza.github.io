@@ -57,20 +57,57 @@ We have the following template to start:
 import socket
 from struct import pack, unpack
 
-SERVER_IP = '127.0.0.1'
-SERVER_PORT = 3700
+server = "127.0.0.1"
+port = 3700
 
-def send():
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-        data = b""
+def send(opcode, data):
+    buf  = pack("<L", opcode)
+    buf += data
 
-        client_socket.connect((SERVER_IP, SERVER_PORT))
-        client_socket.send(data)
-        print("Data sent to the server\n")
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((server, port))
+    s.send(buf)
+    
+    try:
+        ret = s.recv(16384)
+        s.close()
+
+        return ret
+    except:
+        return None
 ```
 
 All modules are compiled with ASLR so we have to reverse the binary to find a memory leak or something like that.
 
 We will use IDA free version.
 
+We see an interesting function called "_handle_connection", we are going to check it. We have three interesting functions inside it, "_get_quote", "_add_quote", and "_log_bad_request".
 
+![image](https://github.com/user-attachments/assets/122055cf-f346-4be5-87e9-fc0be6ea244d)
+
+![image](https://github.com/user-attachments/assets/9f6e7c3e-5c3b-4cc4-8f80-5ee337a03d31)
+
+![image](https://github.com/user-attachments/assets/4fdf2aed-2b51-4805-b72b-5a7a6ea55235)
+
+And the body of each function:
+
+![image](https://github.com/user-attachments/assets/2ab5d72d-4e90-44f8-b24f-55489d8044a7)
+
+![image](https://github.com/user-attachments/assets/2ff02404-0b9b-44a4-94a1-b4c83300ea26)
+
+![image](https://github.com/user-attachments/assets/11325456-3409-4dea-ad51-8152c9d1ca0d)
+
+It seems that we can add a quote to the database with the "_add_quote" function, that return us the index of the quote created. Then, we can check the quote with the index returned and with the function "_get_quote". And finally, after leaking an address with these two functions, we can abuse the overflow vulnerability at "_log_bad_request" function. Let's do that.
+
+We add the three following functions to our python code:
+
+```py
+def get_quote(index):
+    return send(901, pack("<L", index))
+
+def add_quote(quote):
+    return send(902, quote)
+
+def bad_request(buf):
+    return send(800, buf)
+```
