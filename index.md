@@ -7,7 +7,7 @@
 ## About Me
 
 <div style="display: flex;align-items: flex-start;gap:20px;">
-  <p>I'm a Security Researcher with a passion for offensive security, specializing in simulating advanced cyberattacks to identify and exploit vulnerabilities before the bad guys do. With a focus on penetration testing, social engineering, and advanced threat emulation, I help organizations strengthen their defenses and improve their overall security posture. Always staying ahead of the latest attack techniques, I thrive in fast-paced environments where creativity and problem-solving are key to outsmarting adversaries.</p>
+  <p>Soy Red Teamer y me apasiona todo lo relacionado a la seguridad ofensiva. Me especializo en simular ciberataques avanzados para identificar y explotar vulnerabilidades antes de que lo hagan los delincuentes. En esta serie de posts, podrás aprender sobre diversos conceptos que engloban el Red Team y el desarrollo de Malware. ¡Espero que disfrutes de leer mi blog tanto como yo creándolo!</p>
   <img src="https://github.com/user-attachments/assets/7e09e114-93d1-4bce-84e3-8ce7f13feaf6" alt="me" style="border: 1px solid black; width: 150px;"/>
 </div>
 
