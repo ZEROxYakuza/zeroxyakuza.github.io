@@ -117,4 +117,47 @@ Vale, ¿qué hemos hecho aquí?. Primero de todo hemos creado la función MsgBox
 
 Posteriormente hemos indicado que cuando el DLL se cargue (DLL_PROCESS_ATTACH), se ejecute nuestra función.
 
-(Post en proceso de creación...)
+Ya podemos compilar la solución para crear el dll, no olvidemos hacerlo siempre en modo "release" para cualquier proyecto de malware, ya que así evitaremos comprobaciones y tests innecesarios durante la compilación.
+
+Tras esto, creamos otro proyecto con una plantilla vacía o de programa de consola simple. Aquí es donde vamos a crear el ejecutable que cargue el dll. Incluimos el siguiente código:
+
+```c
+#include <Windows.h>
+#include <stdio.h>
+
+
+int main(int argc, char* argv[]) {
+
+	if (argc < 2) {
+		printf("[!] Error: Enter the name of DLL to run\n");
+		return -1;
+	}
+
+	printf("[i] Injecting \"%s\" To The Local Process Of Pid: %d \n", argv[1], GetCurrentProcessId());
+
+
+	printf("[+] Loading Dll... ");
+	if (LoadLibraryA(argv[1]) == NULL) {
+		printf("[!] LoadLibraryA Failed With Error : %d \n", GetLastError());
+		return -1;
+	}
+	printf("[+] DLL Loaded Successfully ! \n");
+
+
+	printf("[#] Press <Enter> To Quit ... ");
+	getchar();
+
+	return 0;
+}
+```
+
+Con esto podremos cargar el DLL que deseemos siempre y cuando especifiquemos su nombre como argumento. Vamos a compilar esta solución y probar el programa.
+
+---
+
+<img width="1065" height="485" alt="imagen" src="https://github.com/user-attachments/assets/87b59b0b-c2c4-4d64-a261-f5234b0da20c" />
+
+---
+
+(En Proceso de Redacción...)
+
