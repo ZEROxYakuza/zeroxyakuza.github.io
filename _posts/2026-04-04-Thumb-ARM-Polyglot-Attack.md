@@ -55,9 +55,9 @@ Mode switching occurs through specific branch instructions:
 
 The critical security-relevant aspect is how the target address is interpreted. When executing BX or BLX, the processor examines the least significant bit (LSB) of the target address to determine the new execution mode. This is where the attack surface emerges.
 
-### 4. The LSB Exploitation Mechanism
+### 3. The LSB Exploitation Mechanism
 
-#### 4.1 LSB as Mode Indicator
+#### 3.1 LSB as Mode Indicator
 The ARM architecture employs an elegant optimization: since instructions must be aligned (4-byte for ARM, 2-byte for Thumb), the least significant bit(s) of any valid instruction address would normally always be zero. Rather than waste this bit, ARM processors repurpose it as a mode indicator when used in branch instructions.
 The LSB encoding works as follows:
 
@@ -80,7 +80,7 @@ Physical address: 0x8000
 ARM mode pointer:   0x8000 (LSB = 0)
 Thumb mode pointer: 0x8001 (LSB = 1)
 
-#### 4.2 The Security Vulnerability
+#### 3.2 The Security Vulnerability
 The security vulnerability arises because the same sequence of bytes can represent completely different instructions depending on the interpretation mode. An attacker can craft a sequence of bytes that:
 
 •	When disassembled as ARM (32-bit) instructions, appears to perform benign operations
@@ -100,21 +100,21 @@ Thumb interpretation:
   0x46C0: mov r8, r8  (NOP-equivalent)
 ```
 
-#### 4.3 Attack Scenarios
+#### 3.3 Attack Scenarios
 Several attack scenarios exploit this confusion.
 
-##### 4.3.1 Static Analysis Evasion
+##### 3.3.1 Static Analysis Evasion
 Security scanners and antivirus software typically disassemble binaries to detect malicious code patterns. Most tools default to ARM mode for disassembly. By crafting polyglot code, an attacker can hide malicious Thumb instructions that are invisible to ARM-mode scanners.
 
-##### 4.3.2 Return-Oriented Programming Enhancement
+##### 3.3.2 Return-Oriented Programming Enhancement
 In ROP attacks, attackers chain together existing code fragments (gadgets) to perform malicious operations. ARM/Thumb confusion doubles the available gadget space: every ARM instruction sequence has a corresponding Thumb interpretation, effectively providing two different gadgets at the same memory location.
 
-##### 4.3.3 Sandbox Escape
+##### 3.3.3 Sandbox Escape
 Sandboxed environments may validate code before execution by disassembling in ARM mode. If the validation logic doesn't account for potential Thumb execution, attackers can inject code that passes ARM validation but executes malicious Thumb instructions.
 
-### 5. Proof of Concept: Shell Spawning Attack
+### 4. Proof of Concept: Shell Spawning Attack
 
-#### 5.1 Attack Overview
+#### 4.1 Attack Overview
 We now present a practical proof-of-concept that demonstrates the real-world exploitability of ARM/Thumb polyglot attacks. Our implementation crafts a polyglot bytecode sequence that:
 
 •	Appears benign when disassembled in ARM mode
@@ -123,7 +123,7 @@ We now present a practical proof-of-concept that demonstrates the real-world exp
 
 •	Uses legitimate syscalls without requiring code injection
 
-#### 5.2 Technical Implementation
+#### 4.2 Technical Implementation
 The attack requires careful construction of a byte sequence that satisfies multiple constraints simultaneously. The shellcode must:
 
 • Decode to innocuous ARM instructions
@@ -161,7 +161,7 @@ binsh:
 
 This Thumb code uses the Linux execve syscall (number 11) to execute /bin/sh. The adr instruction loads the address of the string into r0, while r1 and r2 are set to NULL for the argv and envp parameters.
 
-#### 5.3 Polyglot Bytecode Construction
+#### 4.3 Polyglot Bytecode Construction
 The challenge is encoding this Thumb shellcode in a way that appears benign in ARM mode. We achieve this through careful byte selection. Here is the complete polyglot shellcode:
 
 ```
@@ -187,7 +187,7 @@ unsigned char shellcode[] = {
 };
 ```
 
-#### 5.4 Execution Analysis
+#### 4.4 Execution Analysis
 Let's analyze how this code behaves in each mode:
 
 ```
@@ -215,7 +215,7 @@ Now executing in Thumb mode:
 0x10: df01        svc #1             // execute syscall
 ```
 
-### 6. Detection - Static Analysis
+### 5. Detection - Static Analysis
 Static analysis tools typically disassemble code in a single mode (usually ARM). They cannot automatically detect that the same bytes have a different, malicious interpretation in Thumb mode. To properly detect polyglot attacks, a disassembler would need to:
 
 •	Disassemble every code region in both ARM and Thumb modes
@@ -226,7 +226,7 @@ Static analysis tools typically disassemble code in a single mode (usually ARM).
 
 •	Maintain control flow graphs for both modes simultaneously
 
-### 7. We see you soon...
+### 6. We see you soon...
 Stay hack, stay protected!
 
 
