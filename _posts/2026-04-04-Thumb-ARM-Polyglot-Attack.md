@@ -15,10 +15,15 @@ ARM (Advanced RISC Machine) is a family of reduced instruction set computing (RI
 The traditional ARM instruction set uses fixed-length 32-bit instructions and each instruction is exactly 4 bytes.
 
 Key characteristics of ARM mode include:
+
 •	Fixed 32-bit instruction width
+
 •	4-byte instruction alignment requirement
+
 •	Rich instruction set with conditional execution
+
 •	Powerful addressing modes
+
 •	Full access to all processor features
 
 #### 2.2 Thumb Instruction Set
@@ -27,17 +32,25 @@ Thumb mode achieves approximately 65% of the code size of equivalent ARM code wh
 Thumb instructions are aligned on 2-byte boundaries.
 
 Key characteristics of Thumb mode:
+
 •	16-bit instruction width (32-bit in Thumb-2)
+
 •	2-byte alignment requirement
+
 •	Reduced instruction set
+
 •	Limited register access (r0-r7 primarily)
+
 •	Approximately 35% smaller code size
 
 #### 2.3 The Mode Switching Mechanism
 ARM processors can switch between ARM and Thumb modes dynamically during execution. The current execution mode is tracked in the T bit (bit 5) of the Current Program Status Register (CPSR). When T=0, the processor executes in ARM mode; when T=1, it executes in Thumb mode.
 Mode switching occurs through specific branch instructions:
+
 •	BX (Branch and Exchange): Branches to an address in a register and switches mode based on LSB
+
 •	BLX (Branch with Link and Exchange): Similar to BX but saves return address in link register
+
 •	Exception returns: Mode can change when returning from interrupts or exceptions
 
 The critical security-relevant aspect is how the target address is interpreted. When executing BX or BLX, the processor examines the least significant bit (LSB) of the target address to determine the new execution mode. This is where the attack surface emerges.
@@ -47,12 +60,19 @@ The critical security-relevant aspect is how the target address is interpreted. 
 #### 4.1 LSB as Mode Indicator
 The ARM architecture employs an elegant optimization: since instructions must be aligned (4-byte for ARM, 2-byte for Thumb), the least significant bit(s) of any valid instruction address would normally always be zero. Rather than waste this bit, ARM processors repurpose it as a mode indicator when used in branch instructions.
 The LSB encoding works as follows:
+
 •	LSB = 0: Target address contains ARM mode instructions
+
 •	LSB = 1: Target address contains Thumb mode instructions
+
 When the processor executes a BX or BLX instruction, it:
+
 1.	Reads the target address from the specified register
+   
 2.	Examines the LSB to determine the new mode
+   
 3.	Updates the T bit in CPSR accordingly
+   
 4.	Masks off the LSB(s) and branches to the aligned address
 
 For example:
@@ -62,7 +82,9 @@ Thumb mode pointer: 0x8001 (LSB = 1)
 
 #### 4.2 The Security Vulnerability
 The security vulnerability arises because the same sequence of bytes can represent completely different instructions depending on the interpretation mode. An attacker can craft a sequence of bytes that:
+
 •	When disassembled as ARM (32-bit) instructions, appears to perform benign operations
+
 •	When executed as Thumb (16-bit) instructions, performs malicious operations
 
 Consider the following byte sequence:
@@ -96,14 +118,20 @@ Sandboxed environments may validate code before execution by disassembling in AR
 We now present a practical proof-of-concept that demonstrates the real-world exploitability of ARM/Thumb polyglot attacks. Our implementation crafts a polyglot bytecode sequence that:
 
 •	Appears benign when disassembled in ARM mode
+
 •	Spawns a shell (/bin/sh) when executed in Thumb mode
+
 •	Uses legitimate syscalls without requiring code injection
 
 #### 5.2 Technical Implementation
 The attack requires careful construction of a byte sequence that satisfies multiple constraints simultaneously. The shellcode must:
+
 • Decode to innocuous ARM instructions
+
 •	Decode to functional Thumb shellcode
+
 • Execute the execve syscall with proper arguments
+
 • Handle the string "/bin/sh" in memory
 
 The following assembly demonstrates the Thumb shellcode that spawns a shell:
@@ -162,31 +190,40 @@ unsigned char shellcode[] = {
 #### 5.4 Execution Analysis
 Let's analyze how this code behaves in each mode:
 
+```
 ARM Mode Interpretation (appears benign)
 0x00: e28f3001    add r3, pc, #1     // Harmless arithmetic
 0x04: e12fff13    bx r3              // Branch with exchange
 0x08: ...         (data/garbage)
-
+```
 When disassembled as ARM code, this appears to be simple arithmetic followed by a branch. A static analyzer would see nothing suspicious.
 
 However, when execution reaches this code with the LSB set (Thumb mode), the processor interprets the bytes differently:
 The initial ARM instructions set up the transition:
+
   - 'add r3, pc, #1' sets r3 to PC+1 (LSB=1)
+    
   - 'bx r3' branches to the next instruction in Thumb mode
 
 Now executing in Thumb mode:
+
+```
 0x08: a005        add r0, pc, #20    // r0 -> "/bin/sh"
 0x0a: 2100        movs r1, #0        // argv = NULL
 0x0c: 2200        movs r2, #0        // envp = NULL
 0x0e: 270b        movs r7, #11       // syscall number
 0x10: df01        svc #1             // execute syscall
-
+```
 
 ### 6. Detection - Static Analysis
 Static analysis tools typically disassemble code in a single mode (usually ARM). They cannot automatically detect that the same bytes have a different, malicious interpretation in Thumb mode. To properly detect polyglot attacks, a disassembler would need to:
+
 •	Disassemble every code region in both ARM and Thumb modes
+
 •	Track all possible mode-switching points
+
 •	Analyze both interpretations for suspicious patterns
+
 •	Maintain control flow graphs for both modes simultaneously
 
 ### 7. We see you soon...
