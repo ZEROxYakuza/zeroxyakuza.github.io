@@ -1,0 +1,117 @@
+# Mitre Att&ck Framework
+
+*Bienvenido al underground de la seguridad ofensiva*
+
+<img width="1873" height="698" alt="imagen" src="https://github.com/user-attachments/assets/16eb9c04-3d41-4731-a8d3-470954019e52" />
+
+---
+
+## ¿Qué es Mitre?
+
+MITRE es una organización sin ánimo de lucro estadounidense que opera en la intersección entre el sector público y privado. Trabaja principalmente para agencias gubernamentales de EE.UU y ha contribuido de diversas maneras al mundo de la ciberseguridad:
+
+- CVE: el sistema estándar para identificar vulnerabilidades
+  
+- MITRE ATT&CK: el framework de tácticas y técnicas de adversarios
+  
+- CWE: clasificación de debilidades de software
+  
+- CAPEC: patrones de ataque comunes
+  
+- D3FEND: un framework de conocimiento de contramedidas defensivas
+
+
+## ¿Y qué es entonces Mitre Att&ck?
+
+Es una base de conocimiento creada por la organización MITRE que documenta las tácticas, técnicas y procedimientos (TTPs) que usan los adversarios durante los ciberataques. ATT&CK significa "Adversarial Tactics, Techniques, and Common Knowledge".
+
+El framework se organiza en matrices que cubren diferentes entornos:
+
+- Enterprise: para redes corporativas (Windows, Linux, macOS, cloud)
+
+- Mobile: para dispositivos móviles (Android, iOS)
+
+- ICS: para sistemas de control industrial
+
+## TTPs
+
+Hemos mencionado los TTPs, pero no hemos hecho una distinción entre lo que es cada cosa, asi que vamos a explicarlo un poco mejor.
+
+### Táctica (el "QUÉ" - objetivo)
+El objetivo táctico de alto nivel que el adversario quiere lograr:
+
+- Acceso Inicial
+  
+- Persistencia
+  
+- Escalada de Privilegios
+  
+- Exfiltración de Datos
+
+### Técnica (el "CÓMO" - método)
+El método o manera específica de lograr ese objetivo táctico:
+
+- Phishing
+  
+- Explotar vulnerabilidad pública
+  
+- Credenciales válidas
+  
+- Drive-by Compromise
+
+### Procedimiento (el "CÓMO EXACTO" - implementación)
+La implementación específica y detallada de una técnica por un adversario particular:
+
+- Técnica: Phishing
+
+Procedimiento del Grupo APT28: Enviar emails con archivos .docx maliciosos que explotan CVE-2017-0199, haciéndose pasar por la OTAN, con asuntos relacionados con Ucrania
+
+
+- Técnica: PowerShell
+
+Procedimiento del Grupo FIN7: Usar scripts PowerShell ofuscados con Base64 que descargan Carbanak desde dominios comprometidos de WordPress
+
+
+## ¿APT28? ¿FIN7? ¿Y eso qué es?
+
+Son los grupos de amenaza (Threat Groups o APT - Advanced Persistent Threats), y son actores maliciosos organizados que realizan ciberataques de forma persistente y sofisticada.
+
+-Operan de forma coordinada y persistente en el tiempo
+
+-Tienen objetivos específicos (espionaje, robo, sabotaje, lucro)
+
+-Desarrollan y mantienen infraestructura de ataque propia
+
+-Usan tácticas, técnicas y procedimientos característicos (su "firma")
+
+### Ejemplos de grupos conocidos
+
+- APT28 (Fancy Bear)
+
+Atribución: Inteligencia militar rusa (GRU)
+Objetivos: Gobiernos, militares, medios de comunicación
+Ataques notables: DNC 2016, Juegos Olímpicos, campañas anti-OTAN
+
+- APT29 (Cozy Bear)
+
+Atribución: Inteligencia rusa (SVR)
+Objetivos: Gobiernos, think tanks, investigación
+Ataques notables: SolarWinds (2020)
+
+- Lazarus Group
+
+Atribución: Corea del Norte
+Objetivos: Bancos, criptomonedas, medios
+Ataques notables: Sony Pictures (2014), WannaCry (2017), robo de $81M al Banco de Bangladesh
+
+- FIN7
+
+Motivación: Financiera
+Objetivos: Retail, hospitality, restaurantes
+Especialidad: Robo de datos de tarjetas de crédito (POS malware)
+
+## Conclusión
+
+Si trabajas en ciberseguridad y aún no has integrado MITRE ATT&CK en tu día a día, es momento de empezar. El conocimiento está ahí, estructurado y listo para usar. La pregunta no es si adoptarlo, sino cuándo empezar.
+
+--> https://attack.mitre.org/
