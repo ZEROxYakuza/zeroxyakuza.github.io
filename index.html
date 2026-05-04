@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>David Fernández | Red Team Operator</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --terminal-green: #00ff41;
+            --terminal-blue: #00d9ff;
+            --terminal-red: #ff003c;
+            --terminal-yellow: #ffed4e;
+            --terminal-purple: #bd93f9;
+            --bg-dark: #0d1117;
+            --bg-darker: #010409;
+            --bg-card: #161b22;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --border: #30363d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-darker);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Matrix background effect */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.03;
+            pointer-events: none;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 2px, var(--terminal-green) 3px, transparent 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, var(--terminal-green) 3px, transparent 4px);
+            background-size: 50px 50px;
+            animation: matrixScroll 20s linear infinite;
+        }
+
+        @keyframes matrixScroll {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 50px; }
+        }
+
+        /* Scanline effect */
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            background: linear-gradient(
+                to bottom,
+                transparent 50%,
+                rgba(0, 255, 65, 0.02) 50%
+            );
+            background-size: 100% 4px;
+            animation: scan 8s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Header */
+        header {
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(10px);
+            background: rgba(1, 4, 9, 0.95);
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--terminal-green);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo::before {
+            content: '>';
+            color: var(--terminal-red);
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::before {
+            content: '# ';
+            color: var(--terminal-green);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--terminal-green);
+        }
+
+        .nav-links a:hover::before {
+            opacity: 1;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 85vh;
+            display: flex;
+            align-items: center;
+            padding: 4rem 0;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--terminal-green);
+            line-height: 1.1;
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+        }
+
+        .hero-content h2 {
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            color: var(--terminal-blue);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .terminal-window {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-header {
+            background: var(--bg-dark);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot:nth-child(1) { background: #ff5f56; }
+        .terminal-dot:nth-child(2) { background: #ffbd2e; }
+        .terminal-dot:nth-child(3) { background: #27c93f; }
+
+        .terminal-body {
+            padding: 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .terminal-line {
+            margin-bottom: 0.5rem;
+            animation: typewriter 0.5s steps(40) backwards;
+        }
+
+        .terminal-line:nth-child(1) { animation-delay: 0.2s; }
+        .terminal-line:nth-child(2) { animation-delay: 0.4s; }
+        .terminal-line:nth-child(3) { animation-delay: 0.6s; }
+        .terminal-line:nth-child(4) { animation-delay: 0.8s; }
+        .terminal-line:nth-child(5) { animation-delay: 1s; }
+
+        @keyframes typewriter {
+            from { width: 0; overflow: hidden; }
+            to { width: 100%; overflow: visible; }
+        }
+
+        .terminal-prompt {
+            color: var(--terminal-green);
+        }
+
+        .terminal-command {
+            color: var(--terminal-blue);
+        }
+
+        .terminal-output {
+            color: var(--text-secondary);
+        }
+
+        .profile-image-container {
+            position: relative;
+        }
+
+        .profile-frame {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            border: 2px solid var(--terminal-green);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 65, 0.3),
+                inset 0 0 20px rgba(0, 255, 65, 0.1);
+            animation: glowPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 65, 0.3), inset 0 0 20px rgba(0, 255, 65, 0.1); }
+            50% { box-shadow: 0 0 40px rgba(0, 255, 65, 0.5), inset 0 0 30px rgba(0, 255, 65, 0.2); }
+        }
+
+        .profile-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(20%) contrast(1.1);
+        }
+
+        .profile-frame::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(0, 255, 65, 0.1) 100%);
+            pointer-events: none;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.85rem 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-decoration: none;
+            border: 2px solid;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: transparent;
+            color: var(--terminal-green);
+            border-color: var(--terminal-green);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--terminal-green);
+            transition: left 0.3s;
+            z-index: -1;
+        }
+
+        .btn-primary:hover {
+            color: var(--bg-darker);
+        }
+
+        .btn-primary:hover::before {
+            left: 0;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--terminal-blue);
+            border-color: var(--terminal-blue);
+        }
+
+        .btn-secondary:hover {
+            background: var(--terminal-blue);
+            color: var(--bg-darker);
+        }
+
+        /* Certifications Section - THE STAR */
+        .certifications {
+            padding: 6rem 0;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 800;
+            color: var(--terminal-green);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 30px rgba(0, 255, 65, 0.5);
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .cert-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .cert-tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .cert-tab.active {
+            border-color: var(--terminal-green);
+            color: var(--terminal-green);
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+        }
+
+        .cert-tab:hover:not(.active) {
+            border-color: var(--terminal-blue);
+            color: var(--terminal-blue);
+        }
+
+        .cert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .cert-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .cert-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--terminal-green), var(--terminal-blue));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s;
+        }
+
+        .cert-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .cert-card:hover {
+            border-color: var(--terminal-green);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 255, 65, 0.2);
+        }
+
+        .cert-status {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 3px;
+        }
+
+        .cert-status.completed {
+            background: rgba(0, 255, 65, 0.2);
+            color: var(--terminal-green);
+            border: 1px solid var(--terminal-green);
+        }
+
+        .cert-status.in-progress {
+            background: rgba(255, 237, 78, 0.2);
+            color: var(--terminal-yellow);
+            border: 1px solid var(--terminal-yellow);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .cert-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--terminal-green), var(--terminal-blue));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 255, 65, 0.3);
+        }
+
+        .cert-card:hover .cert-icon {
+            animation: rotate3d 0.6s ease-out;
+        }
+
+        @keyframes rotate3d {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        .cert-name {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--terminal-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .cert-org {
+            color: var(--terminal-blue);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .cert-description {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .cert-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .cert-skill {
+            padding: 0.25rem 0.75rem;
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid var(--terminal-blue);
+            font-size: 0.7rem;
+            color: var(--terminal-blue);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        /* Skills Section */
+        .skills {
+            padding: 6rem 0;
+            background: rgba(13, 17, 23, 0.5);
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .skill-category {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+
+        .skill-category:hover {
+            border-color: var(--terminal-green);
+            box-shadow: 0 10px 30px rgba(0, 255, 65, 0.1);
+        }
+
+        .skill-category h3 {
+            color: var(--terminal-green);
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .skill-category h3::before {
+            content: '//';
+            color: var(--terminal-blue);
+        }
+
+        .skill-list {
+            list-style: none;
+        }
+
+        .skill-list li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .skill-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--terminal-green);
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 6rem 0;
+        }
+
+        .contact-container {
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .contact-container p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin: 1.5rem 0 2rem;
+            line-height: 1.8;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .social-link {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--terminal-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--terminal-green);
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-link::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--terminal-green);
+            transform: translateY(100%);
+            transition: transform 0.3s;
+            z-index: -1;
+        }
+
+        .social-link:hover {
+            color: var(--bg-darker);
+        }
+
+        .social-link:hover::before {
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        footer {
+            padding: 2rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .container {
+                padding: 0 1.5rem;
+            }
+
+            .hero {
+                min-height: auto;
+                padding: 3rem 0;
+            }
+
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 2.5rem;
+            }
+
+            .profile-frame {
+                max-width: 280px;
+                margin: 0 auto;
+            }
+
+            .hero-content h1 {
+                font-size: clamp(2rem, 8vw, 3.5rem);
+            }
+
+            .hero-content h2 {
+                font-size: clamp(1rem, 4vw, 1.5rem);
+            }
+
+            .terminal-body {
+                padding: 1rem;
+                font-size: 0.8rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-links a {
+                font-size: 0.75rem;
+            }
+
+            .section-title {
+                font-size: clamp(1.8rem, 6vw, 2.5rem);
+            }
+
+            .section-subtitle {
+                font-size: 0.9rem;
+            }
+
+            .cert-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .skills-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .certifications {
+                padding: 4rem 0;
+            }
+
+            .skills {
+                padding: 4rem 0;
+            }
+
+            .contact {
+                padding: 4rem 0;
+            }
+
+            .section-header {
+                margin-bottom: 2.5rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            header {
+                padding: 1rem 0;
+            }
+
+            .logo {
+                font-size: 1rem;
+            }
+
+            .nav-links {
+                gap: 0.75rem;
+            }
+
+            .nav-links a {
+                font-size: 0.7rem;
+            }
+
+            .nav-links a::before {
+                content: '';
+            }
+
+            .hero {
+                padding: 2rem 0;
+            }
+
+            .profile-frame {
+                max-width: 240px;
+            }
+
+            .terminal-window {
+                margin-top: 1.5rem;
+            }
+
+            .terminal-body {
+                padding: 0.75rem;
+                font-size: 0.7rem;
+            }
+
+            .terminal-line {
+                margin-bottom: 0.3rem;
+            }
+
+            .cert-tabs {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .cert-tab {
+                width: 100%;
+                padding: 0.65rem 1rem;
+                font-size: 0.75rem;
+            }
+
+            .cert-card {
+                padding: 1.5rem;
+            }
+
+            .cert-status {
+                position: static;
+                display: inline-block;
+                margin-bottom: 1rem;
+                font-size: 0.65rem;
+            }
+
+            .cert-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .cert-name {
+                font-size: 1.2rem;
+            }
+
+            .cert-org {
+                font-size: 0.85rem;
+            }
+
+            .cert-description {
+                font-size: 0.8rem;
+            }
+
+            .cert-skill {
+                font-size: 0.65rem;
+                padding: 0.2rem 0.6rem;
+            }
+
+            .skill-category {
+                padding: 1.5rem;
+            }
+
+            .skill-category h3 {
+                font-size: 1.1rem;
+                margin-bottom: 1rem;
+            }
+
+            .skill-list li {
+                font-size: 0.85rem;
+                padding: 0.4rem 0;
+            }
+
+            .contact-container p {
+                font-size: 0.95rem;
+            }
+
+            .social-links {
+                gap: 1rem;
+            }
+
+            .social-link {
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
+
+            footer {
+                padding: 1.5rem 0;
+                font-size: 0.75rem;
+            }
+
+            .certifications,
+            .skills,
+            .contact {
+                padding: 3rem 0;
+            }
+
+            .section-header {
+                margin-bottom: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-content h1 {
+                font-size: 1.8rem;
+            }
+
+            .hero-content h2 {
+                font-size: 0.95rem;
+            }
+
+            .terminal-body {
+                font-size: 0.65rem;
+                padding: 0.65rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .cert-card {
+                padding: 1.25rem;
+            }
+
+            .cert-name {
+                font-size: 1.1rem;
+            }
+
+            .skill-category h3 {
+                font-size: 1rem;
+            }
+
+            .skill-list li {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Loading animation */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s, transform 0.6s;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="matrix-bg"></div>
+    <div class="scanline"></div>
+
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">david@security:~$</div>
+                <ul class="nav-links">
+                    <li><a href="#certificaciones">certificaciones</a></li>
+                    <li><a href="#skills">habilidades</a></li>
+                    <li><a href="#contacto">contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="hero-grid">
+                    <div class="hero-content">
+                        <h1>David Fernández</h1>
+                        <h2>Red Team Operator | AD Hacking Specialist</h2>
+                        
+                        <div class="terminal-window">
+                            <div class="terminal-header">
+                                <div class="terminal-dot"></div>
+                                <div class="terminal-dot"></div>
+                                <div class="terminal-dot"></div>
+                            </div>
+                            <div class="terminal-body">
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">root@security</span>:<span class="terminal-command">~#</span> whoami
+                                </div>
+                                <div class="terminal-line terminal-output">
+                                    → Offensive Security Professional
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">root@security</span>:<span class="terminal-command">~#</span> cat specialties.txt
+                                </div>
+                                <div class="terminal-line terminal-output">
+                                    → AV Evasion
+                                </div>
+                                <div class="terminal-line terminal-output">
+                                    → Red Team Operations | Active Directory
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="cta-buttons">
+                            <a href="#certificaciones" class="btn btn-primary">Ver Certificaciones</a>
+                            <a href="#contacto" class="btn btn-secondary">Contactar</a>
+                        </div>
+                    </div>
+
+                    <div class="profile-image-container">
+                        <div class="profile-frame">
+                            <img src="me.jpg" alt="David Fernández - Security Researcher">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="certificaciones" class="certifications">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">[ CERTIFICACIONES ]</h2>
+                    <p class="section-subtitle">Offensive Security Certified | Continuously Evolving</p>
+                </div>
+
+                <div class="cert-tabs">
+                    <button class="cert-tab active" data-tab="all">Todas</button>
+                    <button class="cert-tab" data-tab="completed">Completadas</button>
+                    <button class="cert-tab" data-tab="progress">En Progreso</button>
+                </div>
+
+                <div class="cert-grid" id="certGrid">
+                    <!-- OSCP -->
+                    <div class="cert-card fade-up" data-status="completed">
+                        <span class="cert-status completed">✓ Completada</span>
+                        <div class="cert-icon">🔓</div>
+                        <h3 class="cert-name">OSCP</h3>
+                        <p class="cert-org">Offensive Security</p>
+                        <p class="cert-description">
+                            Offensive Security Certified Professional. Certificación práctica que valida habilidades 
+                            en pentesting de infraestructuras mediante examen de 24 horas.
+                        </p>
+                        <div class="cert-skills">
+                            <span class="cert-skill">Pentesting</span>
+                            <span class="cert-skill">Privilege Escalation</span>
+                            <span class="cert-skill">Buffer Overflow</span>
+                            <span class="cert-skill">Active Directory</span>
+                        </div>
+                    </div>
+
+                    <!-- CRTE -->
+                    <div class="cert-card fade-up" data-status="completed">
+                        <span class="cert-status completed">✓ Completada</span>
+                        <div class="cert-icon">🎯</div>
+                        <h3 class="cert-name">CRTE</h3>
+                        <p class="cert-org">Altered Security</p>
+                        <p class="cert-description">
+                            Certified Red Team Expert. Especialización avanzada en ataques a Active Directory, 
+                            lateral movement y evasión de defensas empresariales.
+                        </p>
+                        <div class="cert-skills">
+                            <span class="cert-skill">Active Directory</span>
+                            <span class="cert-skill">Red Teaming</span>
+                            <span class="cert-skill">Lateral Movement</span>
+                            <span class="cert-skill">Evasion</span>
+                        </div>
+                    </div>
+
+                    <!-- CRTO -->
+                    <div class="cert-card fade-up" data-status="completed">
+                        <span class="cert-status completed">✓ Completada</span>
+                        <div class="cert-icon">⚔️</div>
+                        <h3 class="cert-name">CRTO</h3>
+                        <p class="cert-org">Zero-Point Security</p>
+                        <p class="cert-description">
+                            Certified Red Team Operator. Dominio de técnicas red team con Cobalt Strike, 
+                            C2 frameworks y operaciones ofensivas en entornos corporativos.
+                        </p>
+                        <div class="cert-skills">
+                            <span class="cert-skill">Cobalt Strike</span>
+                            <span class="cert-skill">C2 Infrastructure</span>
+                            <span class="cert-skill">OPSEC</span>
+                            <span class="cert-skill">Post-Exploitation</span>
+                        </div>
+                    </div>
+
+                    <!-- CRTM -->
+                    <div class="cert-card fade-up" data-status="in-progress">
+                        <span class="cert-status in-progress">⏳ En Progreso</span>
+                        <div class="cert-icon">🌐</div>
+                        <h3 class="cert-name">CRTM</h3>
+                        <p class="cert-org">Altered Security</p>
+                        <p class="cert-description">
+                            Certified Red Team Master. Certificación muy avanzada enfocada en hacking de Active Directory.
+                        </p>
+                        <div class="cert-skills">
+                            <span class="cert-skill">Active Directory</span>
+                            <span class="cert-skill">Red Teaming</span>
+                            <span class="cert-skill">Lateral Movement</span>
+                            <span class="cert-skill">Evasion</span>
+                        </div>
+                    </div>
+
+                    <!-- CRTL -->
+                    <div class="cert-card fade-up" data-status="in-progress">
+                        <span class="cert-status in-progress">⏳ Próximo</span>
+                        <div class="cert-icon">🔍</div>
+                        <h3 class="cert-name">CRTL</h3>
+                        <p class="cert-org">Zero-Point Security</p>
+                        <p class="cert-description">
+                            Certified Red Team Lead. Certificación que se enfoca en evasión de defensas.
+                        </p>
+                        <div class="cert-skills">
+                            <span class="cert-skill">Cobalt Strike</span>
+                            <span class="cert-skill">C2 Infrastructure</span>
+                            <span class="cert-skill">OPSEC</span>
+                            <span class="cert-skill">Evasion</span>
+                        </div>
+                    </div>
+
+                    <!-- CARTP -->
+                    <div class="cert-card fade-up" data-status="in-progress">
+                        <span class="cert-status in-progress">⏳ Planeada</span>
+                        <div class="cert-icon">💻</div>
+                        <h3 class="cert-name">CARTP</h3>
+                        <p class="cert-org">Altered Security</p>
+                        <p class="cert-description">
+                            Certified Azure Red Team Professional. Certificación de entrada al mundo del Hacking Azure.
+                        </p>
+                        <div class="cert-skills">
+                            <span class="cert-skill">Azure</span>
+                            <span class="cert-skill">Red Teaming</span>
+                            <span class="cert-skill">Lateral Movement</span>
+                            <span class="cert-skill">Evasion</span>
+                        </div>
+                    </div>
+
+                    <!-- CARTE -->
+                    <div class="cert-card fade-up" data-status="in-progress">
+                        <span class="cert-status in-progress">⏳ Planeada</span>
+                        <div class="cert-icon">☁️</div>
+                        <h3 class="cert-name">CARTE</h3>
+                        <p class="cert-org">Altered Security</p>
+                        <p class="cert-description">
+                            Certified Azure Red Team Expert. Certificación avanzada de Red Team Azure.
+                        </p>
+                        <div class="cert-skills">
+                            <span class="cert-skill">Azure</span>
+                            <span class="cert-skill">Red Teaming</span>
+                            <span class="cert-skill">Lateral Movement</span>
+                            <span class="cert-skill">Evasion</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills" class="skills">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">[ ARSENAL TÉCNICO ]</h2>
+                    <p class="section-subtitle">Herramientas y metodologías de hacking</p>
+                </div>
+
+                <div class="skills-grid">
+                    <div class="skill-category fade-up">
+                        <h3>Web Exploitation</h3>
+                        <ul class="skill-list">
+                            <li>Burp Suite Professional</li>
+                            <li>SQL Injection (Advanced)</li>
+                            <li>XSS & CSRF Attacks</li>
+                            <li>SSRF & XXE Exploitation</li>
+                            <li>Authentication Bypass</li>
+                            <li>API Security Testing</li>
+                        </ul>
+                    </div>
+
+                    <div class="skill-category fade-up">
+                        <h3>Red Team & AD</h3>
+                        <ul class="skill-list">
+                            <li>Active Directory Attacks</li>
+                            <li>Cobalt Strike / Sliver</li>
+                            <li>Kerberos Attacks (Kerberoasting)</li>
+                            <li>Lateral Movement</li>
+                            <li>Credential Dumping</li>
+                            <li>Domain Persistence</li>
+                        </ul>
+                    </div>
+
+                    <div class="skill-category fade-up">
+                        <h3>Reconnaissance</h3>
+                        <ul class="skill-list">
+                            <li>OSINT & Information Gathering</li>
+                            <li>Subdomain Enumeration</li>
+                            <li>Nmap & Port Scanning</li>
+                            <li>Directory Bruteforcing</li>
+                            <li>DNS & Email Recon</li>
+                            <li>Social Engineering</li>
+                        </ul>
+                    </div>
+
+                    <div class="skill-category fade-up">
+                        <h3>Programming & Scripting</h3>
+                        <ul class="skill-list">
+                            <li>Python (Automation & Exploits)</li>
+                            <li>Bash Scripting</li>
+                            <li>PowerShell</li>
+                            <li>JavaScript (Node.js)</li>
+                            <li>C/C++ (Binary Exploitation)</li>
+                            <li>Assembly (x86/x64)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contacto" class="contact">
+            <div class="container">
+                <div class="contact-container fade-up">
+                    <h2 class="section-title">[ CONTACTO ]</h2>
+                    <p>
+                        Disponible para consultoría en seguridad, pentesting de aplicaciones web, 
+                        y proyectos de red team. ¿Hablamos de cómo puedo ayudar a asegurar tu infraestructura?
+                    </p>
+                    <div class="social-links">
+                        <a href="https://www.linkedin.com/in/davidfern%C3%A1ndezhern%C3%A1ndez9a28a4133/" target="_blank" class="social-link" title="LinkedIn">💼</a>
+                        <a href="mailto:outdavid21@gmail.com" class="social-link" title="Email">✉️</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>root@security:~$ echo "Try Harder" | Hack The Planet 2024</p>
+        </div>
+    </footer>
+
+    <script>
+        // Intersection Observer for fade-up animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-up').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Certificate filtering
+        const tabs = document.querySelectorAll('.cert-tab');
+        const cards = document.querySelectorAll('.cert-card');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const filter = tab.dataset.tab;
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Filter cards
+                cards.forEach(card => {
+                    const status = card.dataset.status;
+                    
+                    if (filter === 'all') {
+                        card.style.display = 'block';
+                    } else if (filter === 'completed' && status === 'completed') {
+                        card.style.display = 'block';
+                    } else if (filter === 'progress' && status === 'in-progress') {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
