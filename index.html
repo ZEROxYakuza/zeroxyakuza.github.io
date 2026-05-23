@@ -2086,77 +2086,7 @@ if (document.readyState === 'loading') {
 } else {
     initializeBlog();
 }
-// Load blog posts
-function loadBlogPosts() {
-    const blogGrid = document.getElementById('blogGrid');
-    
-    blogPosts.forEach((post, index) => {
-        const blogCard = document.createElement('div');
-        blogCard.className = 'blog-card fade-up';
-        blogCard.innerHTML = `
-            <div class="blog-header">
-                <h3 class="blog-title">${post.title}</h3>
-                <div class="blog-meta">
-                    <span class="blog-date">${post.date}</span>
-                    <span class="blog-read-time">${post.readTime}</span>
-                </div>
-            </div>
-            <div class="blog-body">
-                <p class="blog-excerpt">${post.excerpt}</p>
-                <div class="blog-tags">
-                    ${post.tags.map(tag => `<span class="blog-tag">${tag}</span>`).join('')}
-                </div>
-            </div>
-        `;
-        
-        blogCard.addEventListener('click', () => openBlogModal(post));
-        blogGrid.appendChild(blogCard);
-    });
-}
 
-// Open blog modal
-function openBlogModal(post) {
-    const modal = document.getElementById('blogModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalDate = document.getElementById('modalDate');
-    const modalReadTime = document.getElementById('modalReadTime');
-    const modalBody = document.getElementById('modalBody');
-
-    modalTitle.textContent = post.title;
-    modalDate.textContent = post.date;
-    modalReadTime.textContent = post.readTime;
-    modalBody.innerHTML = marked.parse(post.content);
-
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-// Close blog modal
-function closeBlogModal() {
-    const modal = document.getElementById('blogModal');
-    modal.classList.remove('active');
-    document.body.style.overflow = 'auto';
-}
-
-document.getElementById('closeModal').addEventListener('click', closeBlogModal);
-
-document.getElementById('blogModal').addEventListener('click', (e) => {
-    if (e.target.id === 'blogModal') {
-        closeBlogModal();
-    }
-});
-
-// ESC key to close modal
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        closeBlogModal();
-    }
-});
-
-// Initialize blog on page load
-window.addEventListener('DOMContentLoaded', () => {
-    loadBlogPosts();
-});
     </script>
 </body>
 </html>
