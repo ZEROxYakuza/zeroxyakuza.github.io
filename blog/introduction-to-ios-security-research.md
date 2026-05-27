@@ -1,6 +1,8 @@
 ---
 title: "Introduction to iOS Security Research"
 date: "27 May 2026"
+readTime: "20 min"
+excerpt: "A practical AArch64 reference for security researchers: registers, assembly, calling conventions, and exploit primitives."
 tags: ["iOS", "Security Research", "arm64"]
 ---
 
