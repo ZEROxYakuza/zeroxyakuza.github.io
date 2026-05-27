@@ -1876,10 +1876,11 @@ const blogPostsConfig = [
 
 // Parsear front matter de markdown
 function parseFrontMatter(content) {
-    const frontMatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
+    const frontMatterRegex = /^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/;
     const match = content.match(frontMatterRegex);
     
     if (!match) {
+        console.warn('No front matter found');
         return { metadata: {}, content: content };
     }
     
@@ -1888,10 +1889,15 @@ function parseFrontMatter(content) {
     
     const metadata = {};
     frontMatter.split('\n').forEach(line => {
+        line = line.trim();
+        if (!line || line.startsWith('#')) return;
+        
         const colonIndex = line.indexOf(':');
         if (colonIndex > -1) {
             const key = line.substring(0, colonIndex).trim();
             let value = line.substring(colonIndex + 1).trim();
+            
+            console.log(`Parsing: ${key} = ${value}`); // Debug
             
             // Remover comillas
             value = value.replace(/^["']|["']$/g, '');
@@ -1905,6 +1911,7 @@ function parseFrontMatter(content) {
         }
     });
     
+    console.log('Final metadata:', metadata); // Debug
     return { metadata, content: markdownContent };
 }
 
