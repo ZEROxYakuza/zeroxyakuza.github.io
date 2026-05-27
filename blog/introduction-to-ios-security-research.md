@@ -6,6 +6,7 @@ excerpt: "A practical AArch64 reference for security researchers: registers, ass
 tags: ["iOS", "Security Research", "arm64"]
 ---
 
+
 # ARM64 for Security Researchers: Architecture, Assembly, Registers & Calling Conventions
 
 > A practical deep-dive into AArch64 internals for vulnerability research, reverse engineering, and exploit development.
