@@ -1,7 +1,7 @@
 ---
 title: "Fuzzing ImageIO with AFL++"
 date: "2 Jun 2026"
-readTime: "30 min"
+readTime: "20 min"
 excerpt: "Learn to write a custom harness for fuzzing ImageIO with AFL++"
 tags: ["iOS", "Security Research", "arm64"]
 ---
