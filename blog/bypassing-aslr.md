@@ -13,7 +13,6 @@ tags: ["Windows", "Security Research", "amd64"]
 
 ---
 
-## Bypassing ASLR
 
 ## What is ASLR?
 
