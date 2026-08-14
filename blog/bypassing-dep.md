@@ -1,4 +1,17 @@
-## Bypassing DEP
+---
+title: "Bypassing DEP"
+date: "12 Jun 2026"
+readTime: "40 min"
+excerpt: "Learn to bypass DEP in Windows Userland"
+tags: ["Windows", "Security Research", "amd64"]
+---
+
+
+# Bypassing DEP
+
+> You will learn a how to defeat DEP
+
+---
 
 ## What is DEP?
 
