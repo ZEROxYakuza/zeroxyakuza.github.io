@@ -13,7 +13,6 @@ tags: ["Windows", "Security Research", "amd64"]
 
 ---
 
-## Custom Shellcode x86
 
 ## Shellcode?
 
