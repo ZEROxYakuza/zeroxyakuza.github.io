@@ -1,3 +1,18 @@
+---
+title: "Bypassing ASLR"
+date: "8 Jun 2026"
+readTime: "40 min"
+excerpt: "Learn to bypass ASLR in Windows Userland"
+tags: ["Windows", "Security Research", "amd64"]
+---
+
+
+# Bypassing ASLR
+
+> You will learn a lot, trust me
+
+---
+
 ## Bypassing ASLR
 
 ## What is ASLR?
