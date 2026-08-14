@@ -1,4 +1,10 @@
-## Stack Overflows
+---
+title: "Stack Overflows"
+date: "23 Jun 2026"
+readTime: "20 min"
+excerpt: "Learn exploit a basic Stack Buffer Overflow"
+tags: ["Windows", "Security Research", "amd64"]
+---
 
 ## What is a Stack Buffer Overflow?
 
