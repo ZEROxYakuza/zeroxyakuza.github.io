@@ -1,3 +1,18 @@
+---
+title: "Custom Shellcode x86"
+date: "17 Jun 2026"
+readTime: "30 min"
+excerpt: "Learn to create a custom shellcode"
+tags: ["Windows", "Security Research", "amd64"]
+---
+
+
+# Custom Shellcode x86
+
+> You will learn how to write custom shellcode
+
+---
+
 ## Custom Shellcode x86
 
 ## Shellcode?
