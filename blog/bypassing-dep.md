@@ -9,7 +9,7 @@ tags: ["Windows", "Security Research", "amd64"]
 
 # Bypassing DEP
 
-> You will learn a how to defeat DEP
+> You will learn how to defeat DEP
 
 ---
 
