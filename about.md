@@ -14,14 +14,10 @@ I work around vulnerability research, red teaming, reverse engineering and explo
 ## Research areas
 
 - Windows
-- Linux
+- iOS
 - Kernel
 - Userland
 - Reverse Engineering
 - Exploitation
 - Vulnerability Research
 
-## Contact
-
-- GitHub: `YOUR_USERNAME`
-- Replace the placeholders in `_config.yml` with your real profiles.
