@@ -1,0 +1,46 @@
+title: "ZEROxYakuza"
+tagline: "Vulnerability Research · Exploit Development"
+description: "Technical notes and research on vulnerability research, reverse engineering, exploit development, Windows, macOS and ARM64."
+url: "https://YOUR_USERNAME.github.io"
+baseurl: ""
+lang: en
+timezone: Europe/Madrid
+
+author:
+  name: "David Fernández"
+  email: ""
+  bio: "Vulnerability Researcher & Red Team Operator"
+
+github_username: "YOUR_USERNAME"
+twitter_username: ""
+linkedin_username: ""
+
+avatar: "/assets/img/avatar.svg"
+
+markdown: kramdown
+highlighter: rouge
+permalink: /posts/:title/
+
+collections:
+  research:
+    output: true
+    permalink: /research/:name/
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+  - scope:
+      path: ""
+      type: research
+    values:
+      layout: post
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor
+  - node_modules

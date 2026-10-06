@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+<rect width="256" height="256" rx="32" fill="#111318"/>
+<path d="M48 74h160M48 128h160M48 182h160" stroke="#d7ff4f" stroke-width="10"/>
+<text x="128" y="116" fill="#fff" font-family="monospace" font-size="42" text-anchor="middle">ZX</text>
+</svg>

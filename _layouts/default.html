@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="{{ site.lang | default: 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if page.title %}{{ page.title }} · {% endif %}{{ site.title }}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+</head>
+<body>
+  <button class="mobile-menu" aria-label="Open menu">☰</button>
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="{{ site.avatar | relative_url }}" alt="">
+      <a href="{{ '/' | relative_url }}">{{ site.title }}</a>
+      <p>{{ site.tagline }}</p>
+    </div>
+
+    <nav>
+      <a href="{{ '/' | relative_url }}">⌂ <span>Home</span></a>
+      <a href="{{ '/categories/' | relative_url }}">⌁ <span>Categories</span></a>
+      <a href="{{ '/archives/' | relative_url }}">◷ <span>Archives</span></a>
+      <a href="{{ '/tags/' | relative_url }}"># <span>Tags</span></a>
+      <a href="{{ '/about/' | relative_url }}">◉ <span>About</span></a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      {% if site.github_username %}<a href="https://github.com/{{ site.github_username }}">GitHub</a>{% endif %}
+      {% if site.linkedin_username %}<a href="https://linkedin.com/in/{{ site.linkedin_username }}">LinkedIn</a>{% endif %}
+      <button id="theme-toggle">◐ Theme</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    {{ content }}
+    <footer>
+      <span>© {{ 'now' | date: "%Y" }} {{ site.author.name }}</span>
+      <span>Built with Jekyll</span>
+    </footer>
+  </main>
+
+  <script src="{{ '/assets/js/main.js' | relative_url }}"></script>
+</body>
+</html>

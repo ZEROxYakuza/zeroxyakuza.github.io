@@ -1,0 +1,50 @@
+---
+layout: home
+title: Home
+---
+
+<div class="hero">
+  <div class="hero-kicker">VULNERABILITY RESEARCH · EXPLOIT DEVELOPMENT</div>
+  <h1>Low-level research,<br><span>one bug at a time.</span></h1>
+  <p>
+    Technical notes on reverse engineering, vulnerability research,
+    exploit development, Windows internals, macOS/XNU and ARM64.
+  </p>
+  <div class="hero-links">
+    <a class="button" href="/about/">About me</a>
+    <a class="button ghost" href="/research/">Research</a>
+  </div>
+</div>
+
+<section class="section">
+  <div class="section-heading">
+    <h2>Latest posts</h2>
+    <a href="/archives/">View archive →</a>
+  </div>
+
+  <div class="post-list">
+    {% for post in site.posts limit:8 %}
+      <article class="post-card">
+        <div class="post-meta">{{ post.date | date: "%d %b %Y" }} · {{ post.categories | join: " / " }}</div>
+        <h3><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
+        {% if post.description %}<p>{{ post.description }}</p>{% endif %}
+        <div class="tags">
+          {% for tag in post.tags %}<span>#{{ tag }}</span>{% endfor %}
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-heading"><h2>Categories</h2></div>
+  <div class="topic-grid">
+    <a href="/categories/windows/">Windows</a>
+    <a href="/categories/linux/">Linux</a>
+    <a href="/categories/kernel/">Kernel</a>
+    <a href="/categories/userland/">Userland</a>
+    <a href="/categories/reverse-engineering/">Reverse Engineering</a>
+    <a href="/categories/exploitation/">Exploitation</a>
+    <a href="/categories/vulnerability-research/">Vulnerability Research</a>
+  </div>
+</section>
