@@ -1,8 +1,6 @@
 ---
 title: "A Practical Windows Kernel Research Workflow"
 date: 2026-09-18 18:00:00 +0200
-categories: [Windows, Kernel, Vulnerability Research, Exploitation]
-tags: [windows, kernel, windbg, reversing, exploitation]
 description: "A repeatable workflow for going from an interesting Windows kernel component to a controlled vulnerability research target."
 ---
 
