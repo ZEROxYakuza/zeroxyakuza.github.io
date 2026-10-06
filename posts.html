@@ -1,0 +1,21 @@
+---
+layout: default
+title: Posts
+permalink: /posts/
+---
+
+<header class="page-header">
+  <h1>Posts & Research</h1>
+</header>
+
+<div class="posts-list">
+  {% for post in site.posts %}
+    <article class="post-item" style="margin-bottom: 1.5rem;">
+      <span class="post-date" style="opacity: 0.7; font-size: 0.9rem;">{{ post.date | date: "%d %B %Y" }}</span>
+      <h2 style="margin: 0.2rem 0;"><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h2>
+      {% if post.description %}
+        <p style="margin: 0.2rem 0; opacity: 0.8;">{{ post.description }}</p>
+      {% endif %}
+    </article>
+  {% endfor %}
+</div>
