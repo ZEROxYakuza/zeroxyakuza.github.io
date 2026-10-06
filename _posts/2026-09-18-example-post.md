@@ -28,30 +28,3 @@ Root cause
 Impact analysis
 ```
 
-## Target selection
-
-Start with components that expose complex input parsing, IOCTLs, RPC, filesystem operations or IPC.
-
-## Reverse engineering
-
-Document:
-
-- user/kernel boundaries
-- structures
-- lifetime rules
-- reference counting
-- validation
-- integer conversions
-- pool allocations
-
-## Root cause
-
-The objective is to reduce a crash to a small statement such as:
-
-> An attacker-controlled length reaches an allocation without an equivalent bounds constraint.
-
-That is much more useful than a raw crash dump.
-
-## Reproduction
-
-Keep the proof of concept minimal and deterministic. Separate the bug trigger from any later exploit-development work.
