@@ -1,7 +1,7 @@
 title: "ZEROxYakuza"
 tagline: "Vulnerability Research · Exploit Development"
-description: "Technical notes and research on vulnerability research, reverse engineering, exploit development, Windows, macOS and ARM64."
-url: "https://YOUR_USERNAME.github.io"
+description: "Technical notes and research on vulnerability research, reverse engineering and exploit development."
+url: "https://zeroxyakuza.github.io"
 baseurl: ""
 lang: en
 timezone: Europe/Madrid
@@ -11,11 +11,11 @@ author:
   email: ""
   bio: "Vulnerability Researcher & Red Team Operator"
 
-github_username: "YOUR_USERNAME"
+github_username: "zeroxyakuza"
 twitter_username: ""
 linkedin_username: ""
 
-avatar: "/assets/img/avatar.svg"
+avatar: "/assets/img/avatar.jpg"
 
 markdown: kramdown
 highlighter: rouge
