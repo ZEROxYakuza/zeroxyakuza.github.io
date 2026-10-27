@@ -13,7 +13,6 @@ I work around vulnerability research, red teaming, reverse engineering and explo
 
 ## Research areas
 
-- Windows
 - iOS
 - Kernel
 - Userland
