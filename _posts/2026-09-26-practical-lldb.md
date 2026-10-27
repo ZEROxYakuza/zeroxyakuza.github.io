@@ -4,7 +4,7 @@ date: 2026-09-26 18:00:00 +0200
 description: "This guide details essential LLDB workflows, commands, scripting capabilities, and memory inspection techniques tailored for iOS research."
 ---
 
-# Practical LLDB for iOS Vulnerability Research & Exploitation
+## Practical LLDB for iOS Vulnerability Research & Exploitation
 
 LLDB is the standard debugger for Apple platforms. In iOS vulnerability research, whether you are analyzing userland daemons (`mach-o` binaries) or debugging the XNU kernel via debug kernels or hypervisors (e.g., Corellium), LLDB is an indispensable tool for inspecting state, bypassing checks, dynamic analysis, and developing primitives.
 
