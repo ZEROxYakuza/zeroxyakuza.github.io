@@ -1,6 +1,6 @@
 title: "ZEROxYakuza"
-tagline: "Vulnerability Research · Exploit Development"
-description: "Technical notes and research on vulnerability research, reverse engineering and exploit development."
+tagline: "Pentester - Red Team"
+description: "Notas técnicas sobre research y aprendizaje de seguridad ofensiva."
 url: "https://zeroxyakuza.github.io"
 baseurl: ""
 lang: en
@@ -9,7 +9,7 @@ timezone: Europe/Madrid
 author:
   name: "David Fernández"
   email: ""
-  bio: "Vulnerability Researcher & Red Team Operator"
+  bio: "Red Team Operator"
 
 github_username: "zeroxyakuza"
 twitter_username: ""
