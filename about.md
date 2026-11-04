@@ -1,5 +1,5 @@
 ---
-layout: Cónoceme Mejor
+layout: page
 title: Acerca de Mí
 description: Pentesting, Red Team Operations, Malware Development.
 permalink: /about/
