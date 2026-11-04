@@ -1,22 +1,19 @@
 ---
-layout: page
-title: About
-description: Vulnerability research, reverse engineering and exploit development.
+layout: Cónoceme Mejor
+title: Acerca de Mí
+description: Pentesting, Red Team Operations, Malware Development.
 permalink: /about/
 ---
 
-# About
+# Sobre Mí
 
-I'm **David Fernández**, also known as **ZEROxYakuza**.
+Soy **David Fernández**, también conocido como **ZEROxYakuza**.
 
-I work around vulnerability research, red teaming, reverse engineering and exploit development, with a particular interest in low-level software.
+Me dedico al Red Team, las pruebas de penetración, y el desarrollo de malware, y tengo un interés especial por romper cualquier cosa que se pueda vulnerar :)
 
-## Research areas
+## Áreas de Research
 
-- iOS
-- Kernel
-- Userland
-- Reverse Engineering
-- Exploitation
-- Vulnerability Research
+- Red Team Opeartions
+- Pentesting
+- Malware
 
