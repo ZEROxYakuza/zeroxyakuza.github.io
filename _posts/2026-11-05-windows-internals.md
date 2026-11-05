@@ -171,11 +171,13 @@ Sus campos principales son:
   
 - MitigationFlags / Protection --> Configuraciones de seguridad.
 
-### 2.2 Process Hiding
+## 3 Process Hiding (Caso Práctico)
 
 He mencionado anteriormente de forma breve la estructura `ActiveProcessLinks`, y la he definido como una lista doblemente enlazada que une a todos los procesos del sistema. Para cada entrada de la lista doblemente enlazada, tenemos dos campos, flink y blink, los cuales apuntan al siguiente y anterior elemento respectivamente. Entonces, os pregunto lo siguiente: ¿Podríamos manipular los campos flink y blink de manera que ocultemos un proceso? Pues esta vez sí que tengo buenas noticias, podemos hacerlo.
 
-<img width="1024" height="559" alt="imagen" src="https://github.com/user-attachments/assets/2a173fa8-ba28-48b5-a8b0-ef1423aa6372" />
+Para ocultar el proceso `cmd`, tenemos que modificar la cadena haciendo que el "Flink" de los "ActiveProcessLinks" del proceso anterior apunte a los "ActiveProcessLinks" del proceso siguiente de "cmd". Y que el "Blink" de los "ActiveProcessLinks" del proceso siguiente de "cmd" apunte a los "ActiveProcessLinks" del proceso anterior de "cmd".
+
+<img width="1024" height="572" alt="imagen" src="https://github.com/user-attachments/assets/f68e173b-09da-4e41-8ddc-b7eee104b09e" />
 
 
 ---
