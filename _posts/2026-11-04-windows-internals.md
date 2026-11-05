@@ -173,7 +173,7 @@ Sus campos principales son:
 
 ---
 
-## 3 Process Hiding (Caso Práctico)
+## 3. Process Hiding (Caso Práctico)
 
 He mencionado anteriormente de forma breve la estructura `ActiveProcessLinks`, y la he definido como una lista doblemente enlazada que une a todos los procesos del sistema. Para cada entrada de la lista doblemente enlazada, tenemos dos campos, flink y blink, los cuales apuntan al siguiente y anterior elemento respectivamente. Entonces, os pregunto lo siguiente: ¿Podríamos manipular los campos flink y blink de manera que ocultemos un proceso? Pues esta vez sí que tengo buenas noticias, podemos hacerlo.
 
