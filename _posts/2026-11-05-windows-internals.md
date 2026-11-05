@@ -8,7 +8,7 @@ description: "Aprendizaje sobre Windows Internals para Evasión y Red Team."
 
 Este es el principio de lo que se espera que sea una larga serie documentando y explicando operaciones de Red Team y Evasión en Windows. Posiblemente encontréis este primer post bastante extenso y teórico, pero creo que es importante sentar las bases de cómo funciona windows y su arquitectura antes de ponernos a romper y bypassear cosas. 
 
-Puede que en algunos casos use contenido supervisado por IA para que algunos conceptos queden mejor explicados, me explico, no son posts generados por una Inteligencia Artificial, soy yo (David, un humano, o eso creo...) el que escribe estos artículos. Simplemente no descarto que en algunos casos que no sepa como transmitir algo, le pregunte a un chat de IA cómo enseñarlo y plasmarlo mejor. Era un disclaimer que quería hacer, sinceridad ante todo. 
+Puede que en algunos casos use contenido supervisado por IA para que algunos conceptos queden mejor explicados, me explico, no son posts generados por una Inteligencia Artificial, soy yo (David, un humano) el que escribe estos artículos. Simplemente no descarto que en algunos casos que no sepa como transmitir algo, le pregunte a un chat de IA cómo enseñarlo y plasmarlo mejor. Era un disclaimer que quería hacer, sinceridad ante todo. 
 
 Disculpen por el tocho que se viene, prometo que los siguientes artículos presenten contenido enfocado en casos prácticos, pinky promise. (Aunque adelanto que el siguiente post va a ser sobre EDR Internals, asi que se viene otro Conde de Montecristo hecho artículo.)
 
@@ -27,6 +27,7 @@ El procesador de un ordenador que ejecuta Windows funciona en dos modos diferent
 
 Cuando se inicia una aplicación en modo usuario, Windows crea un proceso para ella. Este proceso proporciona a la aplicación un espacio de direcciones virtuales privado y una tabla de identificadores privada. Dado que el espacio de direcciones virtuales de cada aplicación es privado, una aplicación no puede modificar los datos de otra. Cada aplicación se ejecuta de forma aislada. Este enfoque garantiza que, si una aplicación falla, no afecte a otras aplicaciones ni al sistema operativo.
 
+---
 
 ### 1.1 Procesos
 
@@ -40,6 +41,8 @@ Presenta varias características:
 
 - Todo proceso presenta un nivel de integridad (integrity level) que define lo que puede hacer el proceso.
 
+---
+
 ### 1.2 Niveles de Integridad
 
 Tenemos cuatro distintos niveles de integridad para los procesos:
@@ -52,7 +55,85 @@ Tenemos cuatro distintos niveles de integridad para los procesos:
 
 - System Integrity --> El nivel de integridad más alto, está revervado para los componentes del sistema operativo. Puede interactuar con todos los diferentes niveles de integridad.
 
--En construcción...-
+---
+
+### 1.3 Mitigaciones
+
+Existen una serie de mecanismos de seguridad implementados en Windows para reducir la superficie de ataque y proteger contra técnicas de explotación:
+
+- Data Execution Prevention (DEP) --> Previene la ejecución de código en el stack y el heap.
+
+- Address Space Layout Randomization (ASLR) --> Hace que las direcciones de memoria de los ejecutables y DLLs se definan de forma aleatoria. Esto mitiga técnicas como Return Oriented Programming (ROP).
+
+- Control Flow Guard (CFG) --> Protege contra exploits de corrupción de memoria.
+
+- Signatures Restricted (Microsoft Only) --> Permite solo la ejecución de código firmado por Microsoft.
+
+- Images Restricted --> Bloquea la carga de ejecutables y DLLs desde recursos compartidos como samba (SMB).
+
+---
+
+### 1.4 Threads
+
+Los hilos se encargan de la ejecución de código. Los tipos de hilos más relevantes son:
+
+- Main Thread --> Ejecuta la función principal.
+
+- Threads creados por el código --> Ejecutan funciones definidas por el programador, corriendo concurrentemente con el hilo principal.
+
+Definimos también tres estados distintos para los hilos:
+
+- Waiting --> El hilo se encuentra esperando para la condición necesaria y que continúe la ejecución.
+
+- Ready --> El hilo está preparado para ejecutar pero está esperando la disponibilidad del procesador.
+
+- Running --> El hilo está ejecutándose.
+
+---
+
+### 1.5 Handles
+
+Un handle es un objeto abstracto que actúa como una referencia numérica indexada a un recurso interno del kernel. Vamos, que es algo que pedimos prestado del kernel mediante un indexador.
+
+Cuando un proceso necesita interactuar con un recurso del sistema, como un archivo, un hilo, una clave del registro o un socket de red, no puede acceder a las estructuras de datos de kernel directamente debido a la separación entre modo usuario y modo kernel. En su lugar, el kernel crea la estructura del objeto en espacio de kernel y le devuelve al proceso un entero de 32 o 64 bits: el handle.
+
+Entonces te preguntarás, ¿el handle es un puntero al objeto creado en el kernel? Pues tengo malas noticias querido lector, no es tan sencillo como eso.
+
+Para visualizar la diferencia entre el handle y el objeto del kernel:
+
+- Objeto de Kernel: Es el abrigo físico colgado en el armario de un guardarropa. Está dentro de una zona restringida (Modo Kernel) y tú no puedes pasar a cogerlo directamente, ya que te encuentras en una zona de usuario.
+
+- Handle: Es el tique de plástico con un número (ej. #42) que te da el encargado al dejar el abrigo.
+
+- Uso: Cuando quieres recuperar o usar el abrigo, le enseñas al encargado el tique #42. El encargado (el kernel) busca el perchero #42 en su lista interna, verifica si el tique es tuyo y te da acceso al abrigo.
+
+---
+
+### 1.6 Tokens
+
+A nivel interno en el kernel, encontramos el token de acceso, el cual almacena el contexto de seguridad de un proceso. Entre sus campos principales se encuentran:
+
+- User SID (Security Identifier) -->  El SID del usuario que posee el proceso (ej. S-1-5-21-...-1001). Identifica quién ejecutó el programa.
+
+- Group SIDs --> Una lista de todos los grupos a los que pertenece el usuario (ej. Administradores, Usuarios, Usuarios del escritorio remoto), indicando cuáles están activos para la sesión actual.
+
+- Privilegios --> La lista de derechos del sistema otorgados al token (ej. SeDebugPrivilege para auditar/depurar otros procesos, SeBackupPrivilege, SeShutdownPrivilege). Cada privilegio puede estar habilitado (Enabled) o deshabilitado (Disabled).
+
+- Nivel de Integridad (Integrity Level) --> Clasifica el proceso en uno de los cuatro niveles principales de integridad.
+
+- Token Type --> Puede ser `TokenPrimary` si el token es asignado por defecto a un proceso, o `TokenImpersonation` cuando un token temporal utilizado por un hilo se utiliza para hacerse pasar por otro usuario.
+
+### 1.7 Memoria Virtual
+
+La memoria virtual es la abstracción fundamental de gestión de memoria en Windows. Proporciona a cada proceso la ilusión de tener un espacio de direcciones contiguo, privado y aislado (de 4 GB en 32-bit o hasta 128 TB en 64-bit para espacio de usuario), ocultando la complejidad del hardware y de la memoria RAM física.
+
+Igual algo en este texto te ha provocado una explosión cerebral, ¿cómo es posible tener más memoria virtual que física? Pues por tres conceptos principales:
+
+- El espacio de direcciones no consume RAM por sí solo --> Cuando un programa asigna un bloque de memoria virtual (por ejemplo, pidiendo 10 GB con VirtualAlloc), el kernel solo crea entradas en las tablas de páginas y marca esas direcciones como Reservadas o Comprometidas.
+
+- Paginación bajo demanda --> La RAM física solo se asigna cuando el programa intenta leer o escribir realmente en la memoria asignada. Si una aplicación reserva 100 GB pero solo toca 10 MB, solo consumirá 10 MB de RAM física.
+
+- El archivo de paginación --> Si los procesos terminan necesitando simultáneamente más memoria física de la disponible en los módulos RAM, el gestor de memoria del kernel (Memory Manager) selecciona páginas de RAM que llevan tiempo sin usarse (o que están inactivas) y las escribe en el disco en el archivo pagefile.sys , y entonces, al vaciar esa RAM, el marco físico queda libre para que lo use otro proceso.
 
 ## 2. Kernel Mode
 
