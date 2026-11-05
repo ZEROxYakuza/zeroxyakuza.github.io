@@ -10,7 +10,7 @@ Este es el principio de lo que se espera que sea una larga serie documentando y 
 
 Puede que en algunos casos use contenido supervisado por IA para que algunos conceptos queden mejor explicados, me explico, no son posts generados por una Inteligencia Artificial, soy yo (David, un humano) el que escribe estos artículos. Simplemente no descarto que en algunos casos que no sepa como transmitir algo, le pregunte a un chat de IA cómo enseñarlo y plasmarlo mejor. Era un disclaimer que quería hacer, sinceridad ante todo. 
 
-Disculpen por el tocho que se viene, prometo que los siguientes artículos presenten contenido enfocado en casos prácticos, pinky promise. (Aunque adelanto que el siguiente post va a ser sobre EDR Internals, asi que se viene otro Conde de Montecristo hecho artículo.)
+Disculpen por el tocho que se viene, he intentado incluir técnicas interesantes por el final de este artículo, a modo de casos prácticos. Os adelanto que el siguiente post va a ser sobre EDR Internals, así que se viene otro Conde de Montecristo hecho artículo.
 
 ## User Mode y Kernel Mode
 
@@ -123,6 +123,8 @@ A nivel interno en el kernel, encontramos el token de acceso, el cual almacena e
 
 - Token Type --> Puede ser `TokenPrimary` si el token es asignado por defecto a un proceso, o `TokenImpersonation` cuando un token temporal utilizado por un hilo se utiliza para hacerse pasar por otro usuario.
 
+---
+
 ### 1.7 Memoria Virtual
 
 La memoria virtual es la abstracción fundamental de gestión de memoria en Windows. Proporciona a cada proceso la ilusión de tener un espacio de direcciones contiguo, privado y aislado (de 4 GB en 32-bit o hasta 128 TB en 64-bit para espacio de usuario), ocultando la complejidad del hardware y de la memoria RAM física.
@@ -135,6 +137,38 @@ Igual algo en este texto te ha provocado una explosión cerebral, ¿cómo es pos
 
 - El archivo de paginación --> Si los procesos terminan necesitando simultáneamente más memoria física de la disponible en los módulos RAM, el gestor de memoria del kernel (Memory Manager) selecciona páginas de RAM que llevan tiempo sin usarse (o que están inactivas) y las escribe en el disco en el archivo `pagefile.sys` , y entonces, al vaciar esa RAM, el marco físico queda libre para que lo use otro proceso.
 
+---
+
 ## 2. Kernel Mode
 
 Todo el código que se ejecuta en modo kernel comparte un único espacio de direcciones virtuales. Por ello, un controlador en modo kernel no está aislado de otros controladores ni del sistema operativo. Si un controlador en modo kernel escribe por error en una dirección virtual incorrecta, podría comprometer los datos que pertenecen al sistema operativo o a otro controlador. Si un controlador en modo kernel falla, provoca que todo el sistema operativo se bloquee.
+
+---
+
+### 2.1 EPROCESS
+
+La estructura _EPROCESS (Executive Process) es la estructura de datos central que utiliza el kernel de Windows para representar la parte de alto nivel de un proceso.
+
+Reside exclusivamente en el espacio de memoria del kernel. Mientras que un handle de proceso en modo usuario es simplemente un entero abstracto, en el kernel ese handle referencia internamente al objeto que envuelve a esta estructura.
+
+Sus campos principales son:
+
+- Pcb -->	Estructura de control del microkernel (planificación, CR3, etc.).
+
+- UniqueProcessId	--> El PID (Process ID) del proceso en el sistema.
+
+- ActiveProcessLinks --> Nodo de la lista doblemente enlazada global que une a todos los procesos activos del sistema.
+
+- Token -->	Referencia rápida con recuento de referencias al Access Token (_TOKEN) del proceso.
+
+- ObjectTable -->	Puntero a la tabla de handles privada del proceso.
+
+- Peb	--> Puntero al Process Environment Block (ubicado en espacio de usuario).
+ 
+- ImageFileName	--> Cadena ASCII de hasta 15 caracteres con el nombre del ejecutable (ej. lsass.exe).
+
+- VirtualSize / WorkingSetPage -->	Métricas de contabilidad y consumo de memoria virtual y física.
+  
+- MitigationFlags / Protection --> Configuraciones de seguridad.
+
+### 2.2 
