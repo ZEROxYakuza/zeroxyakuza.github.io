@@ -4,6 +4,14 @@ date: 2026-11-05 18:00:00 +0200
 description: "Aprendizaje sobre Windows Internals para Evasión y Red Team."
 ---
 
+## Introducción y breve inciso
+
+Este es el principio de lo que se espera que sea una larga serie documentando y explicando operaciones de Red Team y Evasión en Windows. Posiblemente encontréis este primer post bastante extenso y teórico, pero creo que es importante sentar las bases de cómo funciona windows y su arquitectura antes de ponernos a romper y bypassear cosas. 
+
+Puede que en algunos casos use contenido supervisado por IA para que algunos conceptos queden mejor explicados, me explico, no son posts generados por una Inteligencia Artificial, soy yo (David, un humano, o eso creo...) el que escribe estos artículos. Simplemente no descarto que en algunos casos que no sepa como transmitir algo, le pregunte a un chat de IA cómo enseñarlo y plasmarlo mejor. Era un disclaimer que quería hacer, sinceridad ante todo. 
+
+Disculpen por el tocho que se viene, prometo que los siguientes artículos presenten contenido enfocado en casos prácticos, pinky promise. (Aunque adelanto que el siguiente post va a ser sobre EDR Internals, asi que se viene otro Conde de Montecristo hecho artículo.)
+
 ## User Mode y Kernel Mode
 
 El procesador de un ordenador que ejecuta Windows funciona en dos modos diferentes: el modo de usuario (user mode) y el modo de núcleo (kernel mode). El procesador alterna entre estos modos en función del tipo de código que esté ejecutando. Las aplicaciones funcionan en user mode. Los componentes principales del sistema operativo funcionan en kernel mode. 
@@ -14,14 +22,6 @@ El procesador de un ordenador que ejecuta Windows funciona en dos modos diferent
 
 
 ---
-
-## 0. Introducción y breve inciso
-
-Este es el principio de lo que se espera que sea una larga serie documentando y explicando operaciones de Red Team y Evasión en Windows. Posiblemente encontréis este primer post bastante extenso y teórico, pero creo que es importante sentar las bases de cómo funciona windows y su arquitectura antes de ponernos a romper y bypassear cosas. 
-
-Puede que en algunos casos use contenido supervisado por IA para que algunos conceptos queden mejor explicados, me explico, no son posts generados por una Inteligencia Artificial, soy yo (David, un humano, o eso creo...) el que escribe estos artículos. Simplemente no descarto que en algunos casos que no sepa como transmitir algo, le pregunte a un chat de IA cómo enseñarlo y plasmarlo mejor. Era un disclaimer que quería hacer, sinceridad ante todo. 
-
-Disculpen por el tocho que se viene, prometo que los siguientes artículos presenten contenido enfocado en casos prácticos, pinky promise. (Aunque adelanto que el siguiente post va a ser sobre EDR Internals, asi que se viene otro Conde de Montecristo hecho artículo.)
 
 ## 1. User Mode
 
