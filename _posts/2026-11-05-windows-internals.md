@@ -1,6 +1,6 @@
 ---
 title: "Windows Internals"
-date: 2026-11-05 18:00:00 +0200
+date: 2026-11-04 18:00:00 +0200
 description: "Aprendizaje sobre Windows Internals para Evasión y Red Team."
 ---
 
