@@ -133,7 +133,7 @@ Igual algo en este texto te ha provocado una explosión cerebral, ¿cómo es pos
 
 - Paginación bajo demanda --> La RAM física solo se asigna cuando el programa intenta leer o escribir realmente en la memoria asignada. Si una aplicación reserva 100 GB pero solo toca 10 MB, solo consumirá 10 MB de RAM física.
 
-- El archivo de paginación --> Si los procesos terminan necesitando simultáneamente más memoria física de la disponible en los módulos RAM, el gestor de memoria del kernel (Memory Manager) selecciona páginas de RAM que llevan tiempo sin usarse (o que están inactivas) y las escribe en el disco en el archivo pagefile.sys , y entonces, al vaciar esa RAM, el marco físico queda libre para que lo use otro proceso.
+- El archivo de paginación --> Si los procesos terminan necesitando simultáneamente más memoria física de la disponible en los módulos RAM, el gestor de memoria del kernel (Memory Manager) selecciona páginas de RAM que llevan tiempo sin usarse (o que están inactivas) y las escribe en el disco en el archivo `pagefile.sys` , y entonces, al vaciar esa RAM, el marco físico queda libre para que lo use otro proceso.
 
 ## 2. Kernel Mode
 
