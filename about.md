@@ -13,7 +13,7 @@ Me dedico al Red Team, las pruebas de penetración, y el desarrollo de malware, 
 
 ## Áreas de Research
 
-- Red Team Opeartions
+- Red Team Operations
 - Pentesting
 - Malware
 
