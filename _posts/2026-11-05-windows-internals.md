@@ -157,7 +157,7 @@ Sus campos principales son:
 
 - UniqueProcessId	--> El PID (Process ID) del proceso en el sistema.
 
-- ActiveProcessLinks --> Nodo de la lista doblemente enlazada global que une a todos los procesos activos del sistema.
+- ActiveProcessLinks --> Lista doblemente enlazada global que une a todos los procesos activos del sistema.
 
 - Token -->	Referencia rápida con recuento de referencias al Access Token (_TOKEN) del proceso.
 
@@ -171,4 +171,11 @@ Sus campos principales son:
   
 - MitigationFlags / Protection --> Configuraciones de seguridad.
 
-### 2.2 
+### 2.2 Process Hiding
+
+He mencionado anteriormente de forma breve la estructura `ActiveProcessLinks`, y la he definido como una lista doblemente enlazada que une a todos los procesos del sistema. Para cada entrada de la lista doblemente enlazada, tenemos dos campos, flink y blink, los cuales apuntan al siguiente y anterior elemento respectivamente. Entonces, os pregunto lo siguiente: ¿Podríamos manipular los campos flink y blink de manera que ocultemos un proceso? Pues esta vez sí que tengo buenas noticias, podemos hacerlo.
+
+<img width="1024" height="559" alt="imagen" src="https://github.com/user-attachments/assets/2a173fa8-ba28-48b5-a8b0-ef1423aa6372" />
+
+
+---
